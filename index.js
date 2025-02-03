@@ -40,14 +40,10 @@ app.use("/test", (req, res) => {
 	res.send("Server running successfully");
 });
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocs, {
-    customSiteTitle: "247Bitoption API Docs",
-    customCss: ".swagger-ui .topbar { display: none }",
-  })
-);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// Serve Swagger UI static files explicitly
+app.use("/api-docs", express.static(path.join(__dirname, "node_modules/swagger-ui-dist")));
 app.use("/uploads", express.static(path.join(__dirname, "/uploads"))); 
 
 app.use("/api/users", userRoute)
