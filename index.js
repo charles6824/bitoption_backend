@@ -5,6 +5,8 @@ import path from "path";
 import connectDB from "./database/db.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 import userRoute from "./routes/user.js"
+import swaggerJsDoc from 'swagger-jsdoc'
+import swaggerUi from 'swagger-ui-express'
 
 dotenv.config();
 const __dirname = path.resolve();
@@ -16,9 +18,9 @@ const swaggerOptions = {
   swaggerDefinition: {
       openapi: '3.0.0',
       info: {
-          title: 'Notification API',
+          title: '247Bitoption API Docs',
           version: '1.0.0',
-          description: 'API for sending notifications to users from an Excel file'
+          description: 'API for 247Bitoption'
       },
       servers: [
           {
@@ -26,7 +28,7 @@ const swaggerOptions = {
           }
       ]
   },
-  apis: [userRoute, ] // Path to the API docs
+  apis: ["./routes/**/*.js"]
 };
 
 app.use(express.json());
@@ -37,15 +39,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/test", (req, res) => {
 	res.send("Server running successfully");
 });
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use("/uploads", express.static(path.join(__dirname, "/uploads"))); 
 
 app.use("/api/users", userRoute)
-app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 app.use(notFound);
 app.use(errorHandler);
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 const PORT = process.env.PORT || 5000;
 

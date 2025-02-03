@@ -1,125 +1,17 @@
 import asyncHandler from "express-async-handler";
-import { decryptData } from "../utils/decrypt.js";
-import { encryptData } from "../utils/encrypt.js";
 import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 import randomstring from "randomstring";
 import Account from "../models/account.js";
 import logActivity from "../utils/logActivity.js";
+import { otpMessage } from "../utils/message.js";
+import sendMail from "../services/sendMail.js";
+import { v4 as uuidv4 } from "uuid";
+import NodeCache from "node-cache";
 
-/*
-  openapi: 3.0.0
-info:
-  title: User Authentication API
-  description: API for user authentication, registration, and account management
-  version: 1.0.0
-servers:
-  - url: http://localhost:5000/api/users
-    description: Local development server
-paths:
-  /register:
-    post:
-      summary: Register a new user
-      description: Creates a new user account with an associated account number
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                payload:
-                  type: object
-                  properties:
-                    fullName:
-                      type: string
-                      example: John Doe
-                    email:
-                      type: string
-                      example: johndoe@example.com
-                    password:
-                      type: string
-                      example: StrongPassword123!
-                    currency:
-                      type: string
-                      example: USD
-      responses:
-        "201":
-          description: User registered successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: User created successfully
-                  data:
-                    type: object
-                    properties:
-                      accountDetails:
-                        type: object
-                      userDetails:
-                        type: object
-        "400":
-          description: Bad request (e.g., missing fields, invalid email, or password too weak)
-  /auth:
-    post:
-      summary: Authenticate user
-      description: Logs in a user and returns an authentication token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                payload:
-                  type: object
-                  properties:
-                    email:
-                      type: string
-                      example: johndoe@example.com
-                    accountNumber:
-                      type: string
-                      example: 0101234567
-                    password:
-                      type: string
-                      example: StrongPassword123!
-      responses:
-        "200":
-          description: User authenticated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Login Successful
-                  data:
-                    type: object
-                    properties:
-                      token:
-                        type: string
-                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-                      userDetails:
-                        type: object
-                      accountDetails:
-                        type: object
-        "401":
-          description: Unauthorized (invalid credentials)
-        "404":
-          description: User not found
-
- */
+// Initialize cache with a default TTL of 10 minutes
+const cache = new NodeCache({ stdTTL: 600 });
 
 const registerUser = asyncHandler(async (req, res) => {
 	try {
@@ -165,18 +57,16 @@ const registerUser = asyncHandler(async (req, res) => {
 					{ new: true, useFindAndModify: false }
 				);
 
+				const saveDetails = {
+					id: saveUser._id,
+					fullName: saveUser.fullName,
+					email: saveUser.email,
+				};
+
 				const response = {
 					accountDetails: saveAccount,
-					userDetails: saveUser,
+					userDetails: saveDetails,
 				};
-				const currentDate = new Date();
-				logActivity(
-					saveUser._id,
-					"Account Creation",
-					currentDate,
-					"successful",
-					"Account Creation initiated Successfully"
-				);
 
 				res.json({
 					status: true,
@@ -184,17 +74,9 @@ const registerUser = asyncHandler(async (req, res) => {
 					data: response,
 				});
 			} else {
-				const currentDate = new Date();
-				logActivity(
-					saveUser._id,
-					"Account Creation",
-					currentDate,
-					"failed",
-					"Account Creation Failed"
-				);
 				res.json({
 					status: false,
-					message: "unable to create User, please contact Admin",
+					message: "Unable to create User, please contact Admin",
 					data: null,
 				});
 			}
@@ -244,26 +126,8 @@ const authUser = asyncHandler(async (req, res) => {
 				accountDetails,
 			};
 
-			const currentDate = new Date();
-
-			logActivity(
-				user._id,
-				"Login",
-				currentDate,
-				"successful",
-				"Login initiated Successfully"
-			);
-
 			res.json({ status: true, message: "Login Successful", data: response });
 		} else {
-			const currentDate = new Date();
-			logActivity(
-				user._id,
-				"Login",
-				currentDate,
-				"failed",
-				"Login initiation failed"
-			);
 			res.json({ status: false, message: "Wrong Credentials", data: null });
 		}
 	} catch (err) {
@@ -273,13 +137,121 @@ const authUser = asyncHandler(async (req, res) => {
 
 const validateAccount = asyncHandler(async (req, res) => {
 	try {
+		const formData = req.body.payload;
+		const user = await User.findOne({ email: formData.email });
+		if (!user) {
+			return res
+				.status(404)
+				.json({ status: false, message: "User not found", data: null });
+		}
+		const otp = randomstring.generate({
+			length: 6,
+			charset: "numeric",
+		});
+		const updateOtp = await User.findByIdAndUpdate(
+			user._id,
+			{
+				otp: otp,
+			},
+			{ new: true, useFindAndModify: false }
+		);
+
+		if (!updateOtp) {
+			return res
+				.status(404)
+				.json({ status: false, message: "Unable to update OTP", data: null });
+		}
+		sendMail(
+			user.email,
+			"OTP Verification",
+			otpMessage(user.fullName, otp)
+		);
+		res.json({ status: true, message: "OTP sent via email", data: user.email });
 	} catch (err) {
 		res.status(500).json({ status: false, message: err.message });
 	}
 });
 
-const verifyOtp = asyncHandler(async (req, res) => {});
+const verifyOtp = asyncHandler(async (req, res) => {
+	try {
+		const formData = req.body.payload;
+		const user = await User.findOne({ email: formData.email });
+		if (!user) {
+			return res
+				.status(404)
+				.json({ status: false, message: "User not found", data: null });
+		}
 
-const resetPassword = asyncHandler(async (req, res) => {});
+		if (user.otp === formData.otp) {
+			// Generate a UUID tracking code
+			const trackingCode = uuidv4();
 
-export { registerUser, authUser };
+			// Store the tracking code in the cache with the user's email as the key
+			cache.set(user.email, trackingCode);
+
+			res.json({
+				status: true,
+				message: "OTP verified",
+				data: { trackingCode },
+			});
+		} else {
+			res.json({ status: false, message: "Invalid OTP", data: null });
+		}
+	} catch (err) {
+		res.status(500).json({ status: false, message: err.message });
+	}
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+	try {
+		const formData = req.body.payload;
+		const user = await User.findOne({ email: formData.email });
+
+		if (!user) {
+			return res
+				.status(404)
+				.json({ status: false, message: "User not found", data: null });
+		}
+
+		// Retrieve the tracking code from the cache
+		const cachedTrackingCode = cache.get(user.email);
+
+		// Validate the tracking code
+		if (cachedTrackingCode && cachedTrackingCode === formData.trackingCode) {
+			const updatePassword = await User.findByIdAndUpdate(
+				user._id,
+				{
+					password: await bcrypt.hash(formData.password, 10),
+				},
+				{ new: true, useFindAndModify: false }
+			);
+
+			if (!updatePassword) {
+				return res.json({
+					status: false,
+					message: "Unable to update Password",
+					data: null,
+				});
+			}
+
+			// Clear the tracking code from the cache after successful password reset
+			cache.del(user.email);
+
+			res.json({
+				status: true,
+				message: "Password reset successful",
+				data: null,
+			});
+		} else {
+			res.status(400).json({
+				status: false,
+				message: "Invalid request, contact admin",
+				data: null,
+			});
+		}
+	} catch (err) {
+		res.status(500).json({ status: false, message: err.message });
+	}
+});
+
+export { registerUser, authUser, validateAccount, verifyOtp, resetPassword };
