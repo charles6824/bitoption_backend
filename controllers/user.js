@@ -9,6 +9,7 @@ import { otpMessage } from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
 import { v4 as uuidv4 } from "uuid";
 import NodeCache from "node-cache";
+import { tokenBlacklist } from "../middleware/authMiddleware.js";
 
 // Initialize cache with a default TTL of 10 minutes
 const cache = new NodeCache({ stdTTL: 600 });
@@ -254,4 +255,29 @@ const resetPassword = asyncHandler(async (req, res) => {
 	}
 });
 
-export { registerUser, authUser, validateAccount, verifyOtp, resetPassword };
+const logout = asyncHandler(async (req, res) => {
+  try {
+      const token = req.headers.authorization?.split(' ')[1]; // Extract token from the Authorization header
+
+      if (!token) {
+          return res.status(400).json({
+              status: false,
+              message: 'No token provided',
+              data: null,
+          });
+      }
+
+      // Add the token to the blacklist
+      tokenBlacklist.set(token, true);
+
+      res.json({
+          status: true,
+          message: 'Logged out successfully',
+          data: null,
+      });
+  } catch (err) {
+      res.status(500).json({ status: false, message: err.message });
+  }
+});
+
+export { registerUser, authUser, validateAccount, verifyOtp, resetPassword, logout };

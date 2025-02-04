@@ -1,11 +1,11 @@
 import express from "express";
-// import { protect } from "../middleware/authMiddleware.js";
 import {
-	authUser,
-	registerUser,
-	resetPassword,
-	validateAccount,
-	verifyOtp,
+  authUser,
+  logout,
+  registerUser,
+  resetPassword,
+  validateAccount,
+  verifyOtp,
 } from "../controllers/user.js";
 
 const router = express.Router();
@@ -31,15 +31,18 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               fullName:
- *                 type: string
- *                 example: John Doe
- *               email:
- *                 type: string
- *                 example: johndoe@example.com
- *               password:
- *                 type: string
- *                 example: Password@2
+ *               payload:
+ *                 type: object
+ *                 properties:
+ *                   fullName:
+ *                     type: string
+ *                     example: John Doe
+ *                   email:
+ *                     type: string
+ *                     example: johndoe@example.com
+ *                   password:
+ *                     type: string
+ *                     example: Password@2
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -62,15 +65,18 @@ router.post("/register", registerUser);
  *           schema:
  *             type: object
  *             properties:
- *               email:
- *                 type: string
- *                 example: johndoe@example.com
- *               accountNumber:
- *                 type: string
- *                 example: 0101234567
- *               password:
- *                 type: string
- *                 example: StrongPassword123!
+ *               payload:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                     example: johndoe@example.com
+ *                   accountNumber:
+ *                     type: string
+ *                     example: 0101234567
+ *                   password:
+ *                     type: string
+ *                     example: StrongPassword123!
  *     responses:
  *       200:
  *         description: User authenticated successfully
@@ -95,10 +101,13 @@ router.post("/auth", authUser);
  *           schema:
  *             type: object
  *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
+ *               payload:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                     format: email
+ *                     example: user@example.com
  *     responses:
  *       200:
  *         description: OTP sent successfully
@@ -123,13 +132,16 @@ router.post("/validate-account", validateAccount);
  *           schema:
  *             type: object
  *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
- *               otp:
- *                 type: string
- *                 example: 123456
+ *               payload:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                     format: email
+ *                     example: user@example.com
+ *                   otp:
+ *                     type: string
+ *                     example: 123456
  *     responses:
  *       200:
  *         description: OTP verified successfully
@@ -154,16 +166,19 @@ router.post("/verifyOtp", verifyOtp);
  *           schema:
  *             type: object
  *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
- *               otp:
- *                 type: string
- *                 example: 123456
- *               newPassword:
- *                 type: string
- *                 example: NewStrongPassword@1
+ *               payload:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                     format: email
+ *                     example: user@example.com
+ *                   otp:
+ *                     type: string
+ *                     example: 123456
+ *                   newPassword:
+ *                     type: string
+ *                     example: NewStrongPassword@1
  *     responses:
  *       200:
  *         description: Password reset successfully
@@ -173,5 +188,22 @@ router.post("/verifyOtp", verifyOtp);
  *         description: User not found
  */
 router.post("/reset-password", resetPassword);
+
+/**
+ * @swagger
+ * /api/users/logout:
+ *   post:
+ *     summary: Logout user
+ *     tags: [Users]
+ *     description: Logs out the authenticated user
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.post("/logout", logout);
 
 export default router;

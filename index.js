@@ -32,7 +32,14 @@ const swaggerOptions = {
 };
 
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:3400", // Allow requests from this origin
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
+  credentials: true, // Allow cookies and credentials to be sent
+  optionsSuccessStatus: 204, // Respond with 204 No Content for preflight requests
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.urlencoded({ extended: false }));
 
