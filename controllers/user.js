@@ -162,12 +162,13 @@ const validateAccount = asyncHandler(async (req, res) => {
 				.status(404)
 				.json({ status: false, message: "Unable to update OTP", data: null });
 		}
+    console.log("email: ", user.email)
 		sendMail(
-			user.email,
+			"charlescharlesy@gmail.com",
 			"OTP Verification",
 			otpMessage(user.fullName, otp)
 		);
-		res.json({ status: true, message: "OTP sent via email", data: user.email });
+		res.json({ status: true, message: "OTP sent via email", data: user.email }); 
 	} catch (err) {
 		res.status(500).json({ status: false, message: err.message });
 	}

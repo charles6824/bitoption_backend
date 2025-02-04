@@ -24,7 +24,7 @@ const swaggerOptions = {
       },
       servers: [
           {
-              url: `http://localhost:${process.env.PORT}`
+              url: process.env.NODE_ENV === "Development" ? `http://localhost:${process.env.PORT}` : "https://bitoption-backend.vercel.app"
           }
       ]
   },
