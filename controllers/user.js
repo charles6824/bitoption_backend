@@ -164,7 +164,7 @@ const validateAccount = asyncHandler(async (req, res) => {
 		}
     console.log("email: ", user.email)
 		await sendMail(
-			"charlescharlesy@gmail.com",
+			user.email,
 			"OTP Verification",
 			otpMessage(user.fullName, otp)
 		);
