@@ -99,9 +99,7 @@ const authUser = asyncHandler(async (req, res) => {
 		});
 
 		if (!user) {
-			return res
-				.status(404)
-				.json({ status: false, message: "User not found", data: null });
+			return res.json({ status: false, message: "User not found", data: null });
 		}
 
 		const confirmPassword = bcrypt.compareSync(
@@ -141,9 +139,7 @@ const validateAccount = asyncHandler(async (req, res) => {
 		const formData = req.body.payload;
 		const user = await User.findOne({ email: formData.email });
 		if (!user) {
-			return res
-				.status(404)
-				.json({ status: false, message: "User not found", data: null });
+			return res.json({ status: false, message: "User not found", data: null });
 		}
 		const otp = randomstring.generate({
 			length: 6,
@@ -158,17 +154,19 @@ const validateAccount = asyncHandler(async (req, res) => {
 		);
 
 		if (!updateOtp) {
-			return res
-				.status(404)
-				.json({ status: false, message: "Unable to update OTP", data: null });
+			return res.json({
+				status: false,
+				message: "Unable to update OTP",
+				data: null,
+			});
 		}
-    console.log("email: ", user.email)
+		console.log("email: ", user.email);
 		await sendMail(
 			user.email,
 			"OTP Verification",
 			otpMessage(user.fullName, otp)
 		);
-		res.json({ status: true, message: "OTP sent via email", data: user.email }); 
+		res.json({ status: true, message: "OTP sent via email", data: user.email });
 	} catch (err) {
 		res.status(500).json({ status: false, message: err.message });
 	}
@@ -179,9 +177,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
 		const formData = req.body.payload;
 		const user = await User.findOne({ email: formData.email });
 		if (!user) {
-			return res
-				.status(404)
-				.json({ status: false, message: "User not found", data: null });
+			return res.json({ status: false, message: "User not found", data: null });
 		}
 
 		if (user.otp === formData.otp) {
@@ -210,9 +206,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 		const user = await User.findOne({ email: formData.email });
 
 		if (!user) {
-			return res
-				.status(404)
-				.json({ status: false, message: "User not found", data: null });
+			return res.json({ status: false, message: "User not found", data: null });
 		}
 
 		// Retrieve the tracking code from the cache
@@ -257,28 +251,35 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
-  try {
-      const token = req.headers.authorization?.split(' ')[1]; // Extract token from the Authorization header
+	try {
+		const token = req.headers.authorization?.split(" ")[1]; // Extract token from the Authorization header
 
-      if (!token) {
-          return res.status(400).json({
-              status: false,
-              message: 'No token provided',
-              data: null,
-          });
-      }
+		if (!token) {
+			return res.status(400).json({
+				status: false,
+				message: "No token provided",
+				data: null,
+			});
+		}
 
-      // Add the token to the blacklist
-      tokenBlacklist.set(token, true);
+		// Add the token to the blacklist
+		tokenBlacklist.set(token, true);
 
-      res.json({
-          status: true,
-          message: 'Logged out successfully',
-          data: null,
-      });
-  } catch (err) {
-      res.status(500).json({ status: false, message: err.message });
-  }
+		res.json({
+			status: true,
+			message: "Logged out successfully",
+			data: null,
+		});
+	} catch (err) {
+		res.status(500).json({ status: false, message: err.message });
+	}
 });
 
-export { registerUser, authUser, validateAccount, verifyOtp, resetPassword, logout };
+export {
+	registerUser,
+	authUser,
+	validateAccount,
+	verifyOtp,
+	resetPassword,
+	logout,
+};

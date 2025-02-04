@@ -173,10 +173,10 @@ router.post("/verifyOtp", verifyOtp);
  *                     type: string
  *                     format: email
  *                     example: user@example.com
- *                   otp:
+ *                   trackingCode:
  *                     type: string
  *                     example: 123456
- *                   newPassword:
+ *                   password:
  *                     type: string
  *                     example: NewStrongPassword@1
  *     responses:
