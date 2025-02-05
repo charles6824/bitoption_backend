@@ -1,15 +1,17 @@
 import mongoose from 'mongoose'
 
-const transactionSchema = mongoose.Schema(
+const packageSchema = mongoose.Schema(
   {
-		user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    
-  },
-  {
-    timestamps: true,
-  }
+    name: {type: String, required: true},
+    price: {type: Number, required: true},
+    interest: {type: Number, required: true},
+    period: {type: Number, required: true},
+},
+{
+    timestamps: true
+}
 );
 
-const Transaction = mongoose.model('Transaction', transactionSchema)
+const Package = mongoose.model('Package', packageSchema)
 
-export default Transaction
+export default Package
