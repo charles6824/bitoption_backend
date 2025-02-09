@@ -1,15 +1,21 @@
 import mongoose from 'mongoose'
 
-const transactionSchema = mongoose.Schema(
+const depositSchema = mongoose.Schema(
   {
-		user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    
+    amount: { type: Number, required: true },
+    accountName: { type: String, required: true },
+    accountNumber: { type: String, required: true },
+    narration: { type: String },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    status: { type: String, enum: ["pending", "approved", "declined"], default: "pending" },
+    method: { type: String, enum: ["bank", "crypto"], required: true },
+    reference: { type: String, unique: true, required: true },
   },
   {
     timestamps: true,
   }
 );
 
-const Transaction = mongoose.model('Transaction', transactionSchema)
+const Deposit = mongoose.model('Deposit', depositSchema)
 
-export default Transaction
+export default Deposit

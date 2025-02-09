@@ -7,6 +7,10 @@ import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 import userRoute from "./routes/user.js";
 import accountRoute from "./routes/account.js";
 import packageRoute from "./routes/package.js";
+import adminRoute from "./routes/admin.js";
+import investmentRoute from "./routes/investment.js";
+import withdrawalRoute from "./routes/withdrawal.js";
+import depositRoute from "./routes/deposit.js";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
@@ -86,8 +90,12 @@ app.use(
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 app.use("/api/users", userRoute);
+app.use("/api/admin", adminRoute);
 app.use("/api/accounts", accountRoute);
 app.use("/api/packages", packageRoute);
+app.use("/api/investment", investmentRoute);
+app.use("/api/deposit", depositRoute);
+app.use("/api/withdrawal", withdrawalRoute);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
 import User from '../models/user.js';
 import NodeCache from 'node-cache';
+import Admin from '../models/admin.js';
 
 // Initialize cache for token blacklist
 const tokenBlacklist = new NodeCache({ stdTTL: 600 }); // Tokens are blacklisted for 10 minutes
@@ -32,6 +33,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
             // Attach the user to the request object
             req.user = await User.findById(decoded.id).select('-password');
+            req.admin = await Admin.findById(decoded.id).select('-password');
 
             // Proceed to the next middleware or route handler
             next();
@@ -56,7 +58,7 @@ const protect = asyncHandler(async (req, res, next) => {
 });
 
 const admin = (req, res, next) => {
-    if (req.user && req.user.isAdmin) {
+    if (req.admin) {
         next();
     } else {
         res.status(401).json({

@@ -1,15 +1,26 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
-const transactionSchema = mongoose.Schema(
-  {
+const investmentSchema = mongoose.Schema(
+	{
 		user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    
-  },
-  {
-    timestamps: true,
-  }
+		package: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "Package" },
+		paid: { type: Boolean, default: false, required: true },
+		transactionID: { type: String },
+		paymentDate: {
+			type: Date,
+		},
+		amount: { type: Number },
+		amountToReceive: { type: Number },
+		completed: { type: Boolean, default: false, required: true },
+		updatedPrice: { type: Number },
+		collectedPayment: { type: Boolean, default: false, required: true },
+		collectedDate: { type: Date },
+	},
+	{
+		timestamps: true,
+	}
 );
 
-const Transaction = mongoose.model('Transaction', transactionSchema)
+const Investment = mongoose.model("Investment", investmentSchema);
 
-export default Transaction
+export default Investment;
