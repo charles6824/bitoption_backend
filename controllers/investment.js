@@ -2,14 +2,16 @@ import mongoose from "mongoose";
 import Package from "../models/packages.js";
 import { v4 as uuidv4 } from "uuid";
 import Account from "../models/account.js";
-import Investment from "../models/investment.js";
+import Investment from "../models/investment.js"
+import asyncHandler from "express-async-handler";
+
 
 // Create Investment
 export const createInvestment = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { userId, packageId } = req.body.payload;
+    const {packageId } = req.body.payload;
 
     // Validate package
     const investmentPackage = await Package.findById(packageId);
@@ -19,7 +21,7 @@ export const createInvestment = async (req, res) => {
     }
 
     // Fetch user's account
-    const userAccount = await Account.findOne({ user: userId }).session(session);
+    const userAccount = await Account.findOne({ user: req.user.id }).session(session);
     if (!userAccount) {
       await session.abortTransaction();
       return res.status(404).json({ message: "User account not found" });
@@ -44,7 +46,7 @@ export const createInvestment = async (req, res) => {
 
     // Create investment
     const newInvestment = new Investment({
-      user: userId,
+      user: req.user.id,
       package: packageId,
       paid: true,
       transactionID: uuidv4(),
@@ -74,3 +76,53 @@ export const createInvestment = async (req, res) => {
     return res.status(500).json({ message: "Error creating investment", error });
   }
 };
+export const getAllInvestments = asyncHandler(async(req, res) => {
+  try {
+		const investments = await Investment.find({});
+		if (investments) {
+			res.json({ data: investments, message: "Retrieved", status: true });
+		} else {
+			res.json({
+				data: null,
+				message: "unable to retrieve investments",
+				status: false,
+			});
+		}
+	} catch (error) {
+		res.status(500).json({ message: "Error fetching investments", error });
+	}
+})
+export const getUserInvestments = asyncHandler(async(req, res) => {
+  try {
+		const investments = await Investment.find({user: req.user.id});
+		if (investments) {
+			res.json({ data: investments, message: "Retrieved", status: true });
+		} else {
+			res.json({
+				data: null,
+				message: "unable to retrieve investments",
+				status: false,
+			});
+		}
+	} catch (error) {
+		res.status(500).json({ message: "Error fetching investments", error });
+	}
+})
+export const getSingleInvestments = asyncHandler(async(req, res) => {
+  try {
+		const investment = await Withdrawal.findById(req.params.id);
+		if (investment) {
+			res.json({ data: investment, message: "Retrieved", status: true });
+		} else {
+			res.json({
+				data: null,
+				message: "unable to retrieve investment",
+				status: false,
+			});
+		}
+	} catch (error) {
+		res.status(500).json({ message: "Error fetching investments", error });
+	}
+})
+
+

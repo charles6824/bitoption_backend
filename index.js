@@ -57,7 +57,10 @@ const swaggerOptions = {
 
 app.use(express.json());
 const corsOptions = {
-	origin: "http://localhost:3400",
+	origin:
+		process.env.NODE_ENV === "Development"
+			? `http://localhost:${process.env.PORT}`
+			: "https://bitoption-backend.vercel.app",
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true,
 	allowedHeaders: ["Authorization", "Content-Type"], // Ensure Authorization is allowed
@@ -93,7 +96,7 @@ app.use("/api/users", userRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/accounts", accountRoute);
 app.use("/api/packages", packageRoute);
-app.use("/api/investment", investmentRoute);
+app.use("/api/investments", investmentRoute);
 app.use("/api/deposit", depositRoute);
 app.use("/api/withdrawal", withdrawalRoute);
 

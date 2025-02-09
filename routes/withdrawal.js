@@ -118,7 +118,7 @@ router.get("/:id", protect, getSingleWithdrawal);
 /**
  * @swagger
  * /api/withdrawals/{id}/approve:
- *   patch:
+ *   put:
  *     summary: Approve a withdrawal (admin only)
  *     tags: [Withdrawals]
  *     security:
@@ -143,7 +143,7 @@ router.patch("/:id/approve", protect, admin, approveWithdrawal);
 /**
  * @swagger
  * /api/withdrawals/{id}/decline:
- *   patch:
+ *   put:
  *     summary: Decline a withdrawal (admin only)
  *     tags: [Withdrawals]
  *     security:
