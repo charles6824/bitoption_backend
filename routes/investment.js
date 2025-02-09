@@ -1,6 +1,6 @@
 import express from "express"
 import { admin, protect, user } from "../middleware/authMiddleware.js";
-import { createInvestment } from "../controllers/investment.js";
+import { createInvestment, getAllInvestments, getUserInvestments } from "../controllers/investment.js";
 const router = express.Router()
 
 /**
@@ -76,6 +76,8 @@ const router = express.Router()
  *                   example: Error creating investment
  */
  router.post("/", protect, user, createInvestment)
+ router.get("/", protect, user, getAllInvestments)
+ router.get("/user", protect, user, getUserInvestments)
 
 
 export default router

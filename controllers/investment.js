@@ -17,20 +17,20 @@ export const createInvestment = async (req, res) => {
     const investmentPackage = await Package.findById(packageId);
     if (!investmentPackage) {
       await session.abortTransaction();
-      return res.status(404).json({ message: "Package not found" });
+      return res.json({ message: "Package not found", status: false, data: null });
     }
 
     // Fetch user's account
     const userAccount = await Account.findOne({ user: req.user.id }).session(session);
     if (!userAccount) {
       await session.abortTransaction();
-      return res.status(404).json({ message: "User account not found" });
+      return res.json({ message: "User account not found", data: null, status: false });
     }
 
     // Check if balance is sufficient
     if (userAccount.balance < investmentPackage.price) {
       await session.abortTransaction();
-      return res.status(400).json({ message: "Insufficient balance" });
+      return res.json({ message: "Insufficient balance", status: false, data: null });
     }
 
     // Deduct balance
@@ -69,11 +69,12 @@ export const createInvestment = async (req, res) => {
     return res.status(201).json({
       message: "Investment created successfully",
       investment: newInvestment,
+      status: true
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    return res.status(500).json({ message: "Error creating investment", error });
+    return res.status(500).json({ message: "Error creating investment", data: error, status: false });
   }
 };
 export const getAllInvestments = asyncHandler(async(req, res) => {

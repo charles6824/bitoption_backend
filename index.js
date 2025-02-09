@@ -97,7 +97,7 @@ app.use("/api/admin", adminRoute);
 app.use("/api/accounts", accountRoute);
 app.use("/api/packages", packageRoute);
 app.use("/api/investments", investmentRoute);
-app.use("/api/deposit", depositRoute);
+app.use("/api/deposit", depositRoute); 
 app.use("/api/withdrawal", withdrawalRoute);
 
 app.use(notFound);
