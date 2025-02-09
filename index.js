@@ -67,6 +67,8 @@ const corsOptions = {
 	optionsSuccessStatus: 204,
 };
 
+
+
 app.use(cors());
 
 app.use(express.urlencoded({ extended: false }));
