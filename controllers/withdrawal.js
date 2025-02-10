@@ -5,6 +5,8 @@ import User from "../models/user.js";
 import randomstring from "randomstring";
 import { withdrawalOTP } from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
+import { createTransaction } from "../utils/transactions.js";
+import { v4 as uuidv4 } from "uuid";
 
 export const initiateWithdrawal = asyncHandler(async (req, res) => {
 	try {
@@ -27,10 +29,13 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 			return res.json({ message: "Invalid OTP", status: false, data: null });
 		}
 
+    const reference = uuidv4()
+
 		const withdrawal = new Withdrawal({
 			user: userId,
 			amount: formData.amount,
 			mode: formData.mode,
+      reference: reference,
 			description: formData.description,
 			cryptoWallet:
 				formData.mode === "crypto" ? formData.cryptoWallet : undefined,
@@ -46,23 +51,38 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 				},
 				{ new: true, useFindAndModify: false }
 			);
-			res
-				.status(201)
-				.json({
-					message: "Withdrawal request created", 
-					data: withdrawal,
-					status: true,
-				});
-		}
+			createTransaction(
+				userId,
+				formData.amount,
+				`Withdrawal/247BO/${
+					formData.description ? formData.description : account.accountNumber
+				}`,
+				reference,
+				"pending"
+			);
+			res.status(201).json({
+				message: "Withdrawal request created",
+				data: withdrawal,
+				status: true,
+			});
+		}else{
+      createTransaction(
+				userId,
+				formData.amount,
+				`Withdrawal/247BO/${
+					formData.description ? formData.description : account.accountNumber
+				}`,
+				reference,
+				"failed"
+			);
+    }
 	} catch (error) {
 		console.log(error);
-		res
-			.status(500)
-			.json({
-				message: "Error initiating withdrawal",
-				data: error,
-				status: false,
-			});
+		res.status(500).json({
+			message: "Error initiating withdrawal",
+			data: error,
+			status: false,
+		});
 	}
 });
 

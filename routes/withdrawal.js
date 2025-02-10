@@ -60,7 +60,7 @@ router.post("/initiate", protect, initiateWithdrawal);
 
 /**
  * @swagger
- * /api/withdrawals:
+ * /api/withdrawal:
  *   get:
  *     summary: Get all withdrawals (admin only)
  *     tags: [Withdrawals]
@@ -76,7 +76,7 @@ router.get("/", protect, admin, getAllWithdrawals);
 
 /**
  * @swagger
- * /api/withdrawals/user:
+ * /api/withdrawal/user:
  *   get:
  *     summary: Get all withdrawals for the logged-in user
  *     tags: [Withdrawals]
@@ -92,7 +92,7 @@ router.get("/user", protect, getUserWithdrawals);
 
 /**
  * @swagger
- * /api/withdrawals/verify-otp:
+ * /api/withdrawal/verify-otp:
  *   get:
  *     summary: Verify OTP for Withdrawal
  *     tags: [Withdrawals]
@@ -108,7 +108,7 @@ router.get("/verify-otp", protect, user, sendOTP)
 
 /**
  * @swagger
- * /api/withdrawals/{id}:
+ * /api/withdrawal/{id}:
  *   get:
  *     summary: Get a single withdrawal by ID
  *     tags: [Withdrawals]
@@ -133,7 +133,7 @@ router.get("/:id", protect, getSingleWithdrawal);
 
 /**
  * @swagger
- * /api/withdrawals/{id}/approve:
+ * /api/withdrawal/{id}/approve:
  *   put:
  *     summary: Approve a withdrawal (admin only)
  *     tags: [Withdrawals]
@@ -158,7 +158,7 @@ router.put("/:id/approve", protect, admin, approveWithdrawal);
 
 /**
  * @swagger
- * /api/withdrawals/{id}/decline:
+ * /api/withdrawal/{id}/decline:
  *   put:
  *     summary: Decline a withdrawal (admin only)
  *     tags: [Withdrawals]

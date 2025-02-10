@@ -5,6 +5,13 @@ const router = express.Router()
 
 /**
  * @swagger
+ * tags:
+ *   name: Investments
+ *   description: Endpoints for managing withdrawals
+ */
+
+/**
+ * @swagger
  * /api/investments:
  *   post:
  *     summary: Create a new investment
@@ -76,7 +83,38 @@ const router = express.Router()
  *                   example: Error creating investment
  */
  router.post("/", protect, user, createInvestment)
+
+
+ /**
+ * @swagger
+ * /api/investments:
+ *   get:
+ *     summary: Get all investments (admin only)
+ *     tags: [Investments]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all investments
+ *       500:
+ *         description: Server error
+ */
  router.get("/", protect, user, getAllInvestments)
+
+ /**
+ * @swagger
+ * /api/investments/user:
+ *   get:
+ *     summary: Get all investments for the logged-in user
+ *     tags: [Investments]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user investments
+ *       500:
+ *         description: Server error
+ */
  router.get("/user", protect, user, getUserInvestments)
 
 

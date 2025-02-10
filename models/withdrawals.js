@@ -9,6 +9,11 @@ const withdrawalSchema = new mongoose.Schema(
       enum: ["pending", "approved", "declined"],
       default: "pending",
     },
+    reference: {
+			type: String,
+			required: true,
+			unique: true,
+		},
     mode: { type: String, enum: ["crypto", "bank"], required: true },
     description: { type: String },
     cryptoWallet: { type: String, required: function () { return this.mode === "crypto"; } },

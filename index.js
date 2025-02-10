@@ -10,6 +10,7 @@ import packageRoute from "./routes/package.js";
 import adminRoute from "./routes/admin.js";
 import investmentRoute from "./routes/investment.js";
 import withdrawalRoute from "./routes/withdrawal.js";
+import transactionRoute from "./routes/transaction.js";
 import depositRoute from "./routes/deposit.js";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
@@ -101,6 +102,7 @@ app.use("/api/packages", packageRoute);
 app.use("/api/investments", investmentRoute);
 app.use("/api/deposit", depositRoute); 
 app.use("/api/withdrawal", withdrawalRoute);
+app.use("/api/transaction", transactionRoute);
 
 app.use(notFound);
 app.use(errorHandler);
