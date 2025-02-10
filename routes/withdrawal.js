@@ -92,6 +92,22 @@ router.get("/user", protect, getUserWithdrawals);
 
 /**
  * @swagger
+ * /api/withdrawals/verify-otp:
+ *   get:
+ *     summary: Verify OTP for Withdrawal
+ *     tags: [Withdrawals]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user withdrawals
+ *       500:
+ *         description: Server error
+ */
+router.get("/verify-otp", protect, user, sendOTP)
+
+/**
+ * @swagger
  * /api/withdrawals/{id}:
  *   get:
  *     summary: Get a single withdrawal by ID
@@ -165,20 +181,5 @@ router.put("/:id/approve", protect, admin, approveWithdrawal);
  */
 router.put("/:id/decline", protect, admin, declineWithdrawal);
 
-/**
- * @swagger
- * /api/withdrawals/verify-otp:
- *   get:
- *     summary: Verify OTP for Withdrawal
- *     tags: [Withdrawals]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: List of user withdrawals
- *       500:
- *         description: Server error
- */
-router.get("/verify-otp", protect, user, sendOTP)
 
 export default router;
