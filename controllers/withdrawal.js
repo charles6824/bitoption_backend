@@ -6,23 +6,26 @@ import randomstring from "randomstring";
 import { withdrawalOTP } from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
 
-
 export const initiateWithdrawal = asyncHandler(async (req, res) => {
 	try {
 		const formData = req.body.payload;
 		const userId = req.user.id;
 
-		const userAccount = await Account.findOne({ user: userId }).session(
-			session
-		);
+		const userAccount = await User.findOne({ _id: userId });
+		const account = await Account.findOne({ user: userId });
+		console.log(userAccount);
 
-		if (!formData.amount || formData.amount <= userAccount.balance) {
-			return res.json({ message: "Invalid withdrawal amount", status: false, data: null });
+		if (!formData.amount || formData.amount > userAccount.balance) {
+			return res.json({
+				message: "Invalid withdrawal amount",
+				status: false,
+				data: null,
+			});
 		}
 
-    if(userAccount.otp !== formData.otp){
+		if (userAccount.otp != formData.otp) {
 			return res.json({ message: "Invalid OTP", status: false, data: null });
-    }
+		}
 
 		const withdrawal = new Withdrawal({
 			user: userId,
@@ -34,10 +37,32 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 			bankDetails: formData.mode === "bank" ? formData.bankDetails : undefined,
 		});
 
-		await withdrawal.save();
-		res.status(201).json({ message: "Withdrawal request created", withdrawal });
+		const saveWithdrawal = await withdrawal.save();
+		if (saveWithdrawal) {
+			await Account.findByIdAndUpdate(
+				account._id,
+				{
+					balance: Number(account.balance) - Number(formData.amount),
+				},
+				{ new: true, useFindAndModify: false }
+			);
+			res
+				.status(201)
+				.json({
+					message: "Withdrawal request created", 
+					data: withdrawal,
+					status: true,
+				});
+		}
 	} catch (error) {
-		res.status(500).json({ message: "Error initiating withdrawal", error });
+		console.log(error);
+		res
+			.status(500)
+			.json({
+				message: "Error initiating withdrawal",
+				data: error,
+				status: false,
+			});
 	}
 });
 

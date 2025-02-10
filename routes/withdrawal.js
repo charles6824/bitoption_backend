@@ -14,7 +14,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/withdrawals/initiate:
+ * /api/withdrawal/initiate:
  *   post:
  *     summary: Initiate a withdrawal request
  *     tags: [Withdrawals]
