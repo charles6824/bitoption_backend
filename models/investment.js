@@ -13,6 +13,7 @@ const investmentSchema = mongoose.Schema(
 		amountToReceive: { type: Number },
 		completed: { type: Boolean, default: false, required: true },
 		updatedPrice: { type: Number },
+		dailyIncrease: { type: Number },
 		collectedPayment: { type: Boolean, default: false, required: true },
 		collectedDate: { type: Date },
 	},
@@ -21,6 +22,6 @@ const investmentSchema = mongoose.Schema(
 	}
 );
 
-const Investment = mongoose.model("Investment", investmentSchema);
+const Investment = mongoose.model("Investment", investmentSchema); 
 
 export default Investment;

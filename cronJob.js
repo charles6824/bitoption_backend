@@ -2,18 +2,25 @@ import cron from "node-cron";
 import Investment from "./models/investment.js";
 
 // Daily Update Job
-cron.schedule("0 0 * * *", async () => {
+cron.schedule("* * * * *", async () => {
   console.log("Running daily investment update...");
   try {
     const investments = await Investment.find({ completed: false });
 
     for (let investment of investments) {
-      investment.updatedPrice += investment.dailyIncrease;
+      console.log("investment: ", investment)
+      // Ensure updatedPrice and dailyIncrease are valid numbers
+      const currentPrice = Number(investment.updatedPrice) || 0;
+      const dailyIncrease = Number(investment.dailyIncrease) || 0;
+      const amountToReceive = Number(investment.amountToReceive) || 0;
+
+      // Perform the update
+      investment.updatedPrice = currentPrice + dailyIncrease;
 
       // Mark as completed if fully paid
-      if (investment.updatedPrice >= investment.amountToReceive) {
+      if (investment.updatedPrice >= amountToReceive) {
         investment.completed = true;
-        investment.updatedPrice = investment.amountToReceive;
+        investment.updatedPrice = amountToReceive; // Ensure it doesn't exceed the expected amount
       }
 
       await investment.save();

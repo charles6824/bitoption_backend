@@ -14,6 +14,7 @@ import transactionRoute from "./routes/transaction.js";
 import depositRoute from "./routes/deposit.js";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import './cronJob.js'
 
 dotenv.config();
 const __dirname = path.resolve();
