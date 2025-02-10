@@ -27,6 +27,18 @@ export const createInvestment = async (req, res) => {
       return res.json({ message: "User account not found", data: null, status: false });
     }
 
+    // Check if user already has an active investment for this package
+    const existingInvestment = await Investment.findOne({
+      user: req.user.id,
+      package: packageId,
+      completed: false, // Assuming 'completed' indicates if the investment is still active
+    }).session(session);
+
+    if (existingInvestment) {
+      await session.abortTransaction();
+      return res.json({ message: "User already invested in this package", status: false, data: null });
+    }
+
     // Check if balance is sufficient
     if (userAccount.balance < investmentPackage.price) {
       await session.abortTransaction();

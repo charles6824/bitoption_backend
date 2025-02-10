@@ -1,6 +1,11 @@
 import asyncHandler from "express-async-handler";
 import Withdrawal from "../models/withdrawals.js";
 import Account from "../models/account.js";
+import User from "../models/user.js";
+import randomstring from "randomstring";
+import { withdrawalOTP } from "../utils/message.js";
+import sendMail from "../services/sendMail.js";
+
 
 export const initiateWithdrawal = asyncHandler(async (req, res) => {
 	try {
@@ -12,8 +17,12 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 		);
 
 		if (!formData.amount || formData.amount <= userAccount.balance) {
-			return res.status(400).json({ message: "Invalid withdrawal amount" });
+			return res.json({ message: "Invalid withdrawal amount", status: false, data: null });
 		}
+
+    if(userAccount.otp !== formData.otp){
+			return res.json({ message: "Invalid OTP", status: false, data: null });
+    }
 
 		const withdrawal = new Withdrawal({
 			user: userId,
@@ -114,6 +123,43 @@ export const declineWithdrawal = async (req, res) => {
 		withdrawal.status = "declined";
 		await withdrawal.save();
 		res.status(200).json({ message: "Withdrawal declined", withdrawal });
+	} catch (error) {
+		res.status(500).json({ message: "Error declining withdrawal", error });
+	}
+};
+
+export const sendOTP = async (req, res) => {
+	try {
+		const user = await User.findById(req.user.id);
+		if (!user) {
+			return res.json({ status: false, message: "User not found", data: null });
+		}
+		const otp = randomstring.generate({
+			length: 6,
+			charset: "numeric",
+		});
+		const updateOtp = await User.findByIdAndUpdate(
+			user._id,
+			{
+				otp: otp,
+			},
+			{ new: true, useFindAndModify: false }
+		);
+
+		if (!updateOtp) {
+			return res.json({
+				status: false,
+				message: "Unable to update OTP",
+				data: null,
+			});
+		}
+		console.log("email: ", user.email);
+		await sendMail(
+			user.email,
+			"OTP Verification For Withdrawal",
+			withdrawalOTP(user.fullName, otp)
+		);
+		res.json({ status: true, message: "OTP sent via email", data: null });
 	} catch (error) {
 		res.status(500).json({ message: "Error declining withdrawal", error });
 	}
