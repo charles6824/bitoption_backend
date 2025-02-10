@@ -75,8 +75,6 @@ router.post("/fund-wallet", protect, admin, fundWallet);
  *                     type: string
  *                   narration:
  *                     type: string
- *                   userId:
- *                     type: string
  *     responses:
  *       201:
  *         description: Deposit request created successfully
@@ -105,7 +103,7 @@ router.post("/fund-bank", protect, user, fundWithBank);
  *                 properties:
  *                   amount:
  *                     type: number
- *                   userId:
+ *                   narration:
  *                     type: string
  *     responses:
  *       201:

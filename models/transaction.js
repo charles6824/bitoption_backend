@@ -24,6 +24,11 @@ const transactionSchema = new mongoose.Schema(
 			type: String,
 			enum: ["pending", "completed", "failed"],
 			default: "pending",
+    },
+		type: {
+			type: String,
+			enum: ["inflow", "outflow"],
+			default: "inflow",
 		},
 		date: {
 			type: Date,

@@ -1,8 +1,12 @@
-import express from "express"
+import express from "express";
 import { admin, protect, user } from "../middleware/authMiddleware.js";
-import { getAllTransactions, getUserTransactions } from "../controllers/transactions.js";
+import {
+	getAllTransactions,
+	getCashflowAnalysis,
+	getUserTransactions,
+} from "../controllers/transactions.js";
 
-const router = express.Router()
+const router = express.Router();
 
 /**
  * @swagger
@@ -10,7 +14,6 @@ const router = express.Router()
  *   name: Transactions
  *   description: Endpoints for managing Transactions
  */
-
 
 /**
  * @swagger
@@ -26,8 +29,7 @@ const router = express.Router()
  *       500:
  *         description: Server error
  */
-router.get("/", protect, admin, getAllTransactions)
-
+router.get("/", protect, admin, getAllTransactions);
 
 /**
  * @swagger
@@ -43,7 +45,8 @@ router.get("/", protect, admin, getAllTransactions)
  *       500:
  *         description: Server error
  */
-router.get("/user", protect, user, getUserTransactions)
+router.get("/user", protect, user, getUserTransactions);
 
+router.get("/cashflow", protect, getCashflowAnalysis);
 
-export default router
+export default router;

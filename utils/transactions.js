@@ -1,6 +1,6 @@
 import Transaction from "../models/transaction.js";
 
-export const createTransaction = async ({ user, amount, description, reference, status }) => {
+export const createTransaction = async ({ user, amount, description, reference, status, type }) => {
   try {
     const transaction = new Transaction({
       user,
@@ -8,6 +8,7 @@ export const createTransaction = async ({ user, amount, description, reference, 
       description,
       reference,
       status,
+      type,
       date: new Date(),
     });
 

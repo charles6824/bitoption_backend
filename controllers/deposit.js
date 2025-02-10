@@ -8,9 +8,9 @@ import Transaction from "../models/transaction.js";
 export const fundWallet = asyncHandler(async (req, res) => {
 	try {
 		const formData = req.body.payload; // Extracting payload
-		const { amount, accountName, accountNumber, narration, userId, method } =
-			formData;
+		const { amount, accountName, accountNumber, narration, method } = formData;
 		const reference = uuidv4();
+		const userId = req.user.id;
 
 		const newDeposit = new Deposit({
 			amount,
@@ -30,6 +30,7 @@ export const fundWallet = asyncHandler(async (req, res) => {
 			description: `Deposit/247BO/${narration ? narration : accountNumber}`,
 			reference: reference,
 			status: "completed",
+			type: "inflow",
 		});
 		return res
 			.status(201)
@@ -67,6 +68,7 @@ export const fundWithBank = async (req, res) => {
 			} bank`,
 			reference: reference,
 			status: "pending",
+			type: "inflow",
 		});
 		return res
 			.status(201)
@@ -80,14 +82,16 @@ export const fundWithBank = async (req, res) => {
 export const fundWithCrypto = async (req, res) => {
 	try {
 		const formData = req.body.payload;
-		const { amount, userId } = formData;
+		const { amount, narration } = formData;
 		const reference = uuidv4();
+		const userId = req.user.id;
 
 		const newDeposit = new Deposit({
 			amount,
 			user: userId,
 			method: "crypto",
 			reference,
+			narration,
 			status: "pending",
 		});
 
@@ -100,14 +104,19 @@ export const fundWithCrypto = async (req, res) => {
 			} crypto`,
 			reference: reference,
 			status: "pending",
+			type: "inflow",
 		});
-		return res
-			.status(201)
-			.json({ message: "Crypto deposit request created", deposit: newDeposit });
+		return res.json({
+			message: "Crypto deposit request created",
+			data: newDeposit,
+			status: true,
+		});
 	} catch (error) {
-		return res
-			.status(500)
-			.json({ message: "Error processing crypto deposit", error });
+		return res.status(500).json({
+			message: "Error processing crypto deposit",
+			data: error,
+			status: false,
+		});
 	}
 };
 
@@ -138,13 +147,11 @@ export const approveFunding = async (req, res) => {
 			{ status: "completed" },
 			{ new: true }
 		);
-		return res
-			.status(200)
-			.json({
-				message: "Deposit approved successfully",
-				data: deposit,
-				status: true,
-			});
+		return res.status(200).json({
+			message: "Deposit approved successfully",
+			data: deposit,
+			status: true,
+		});
 	} catch (error) {
 		return res
 			.status(500)
@@ -169,7 +176,7 @@ export const declineFunding = async (req, res) => {
 		});
 		if (!deposit) return res.status(404).json({ message: "Deposit not found" });
 
-    await Transaction.findByIdAndUpdate(
+		await Transaction.findByIdAndUpdate(
 			transaction._id,
 			{ status: "failed" },
 			{ new: true }

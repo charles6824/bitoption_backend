@@ -60,6 +60,7 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 				}`,
 				reference: reference,
 				status: "pending",
+        type: "outflow"
 			});
 			res.status(201).json({
 				message: "Withdrawal request created",
@@ -75,6 +76,7 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 				}`,
 				reference: reference,
 				status: "failed",
+        type: "outflow"
 			});
 		}
 	} catch (error) {
