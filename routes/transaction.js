@@ -1,5 +1,5 @@
 import express from "express"
-import { admin, protect } from "../middleware/authMiddleware.js";
+import { admin, protect, user } from "../middleware/authMiddleware.js";
 import { getAllTransactions, getUserTransactions } from "../controllers/transactions.js";
 
 const router = express.Router()
@@ -14,7 +14,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/transactions:
+ * /api/transaction:
  *   get:
  *     summary: Get all transactions (admin only)
  *     tags: [Transactions]
@@ -43,7 +43,7 @@ router.get("/", protect, admin, getAllTransactions)
  *       500:
  *         description: Server error
  */
-router.get("/user", protect, admin, getUserTransactions)
+router.get("/user", protect, user, getUserTransactions)
 
 
 export default router
