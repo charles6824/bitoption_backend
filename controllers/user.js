@@ -160,7 +160,7 @@ const validateAccount = asyncHandler(async (req, res) => {
 				data: null,
 			});
 		}
-		console.log("email: ", user.email);
+		// console.log("email: ", user.email);
 		await sendMail(
 			user.email,
 			"OTP Verification",

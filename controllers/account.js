@@ -4,7 +4,7 @@ import Account from "../models/account.js";
 
 export const getBalance = asyncHandler(async (req, res) => {
   try {
-    console.log(req.headers.authorization);
+    // console.log(req.headers.authorization);
     const account = await Account.findOne({ user: req.user._id });
     if (account) {
       res.status(200).json({ balance: account.balance });

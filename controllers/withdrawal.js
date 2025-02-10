@@ -7,6 +7,7 @@ import { withdrawalOTP } from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
 import { createTransaction } from "../utils/transactions.js";
 import { v4 as uuidv4 } from "uuid";
+import Transaction from "../models/transaction.js";
 
 export const initiateWithdrawal = asyncHandler(async (req, res) => {
 	try {
@@ -15,7 +16,7 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 
 		const userAccount = await User.findOne({ _id: userId });
 		const account = await Account.findOne({ user: userId });
-		console.log(userAccount);
+		// console.log(userAccount);
 
 		if (!formData.amount || formData.amount > userAccount.balance) {
 			return res.json({
@@ -29,13 +30,13 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 			return res.json({ message: "Invalid OTP", status: false, data: null });
 		}
 
-    const reference = uuidv4()
+		const reference = uuidv4();
 
 		const withdrawal = new Withdrawal({
 			user: userId,
 			amount: formData.amount,
 			mode: formData.mode,
-      reference: reference,
+			reference: reference,
 			description: formData.description,
 			cryptoWallet:
 				formData.mode === "crypto" ? formData.cryptoWallet : undefined,
@@ -51,33 +52,33 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 				},
 				{ new: true, useFindAndModify: false }
 			);
-			createTransaction(
-				userId,
-				formData.amount,
-				`Withdrawal/247BO/${
+			await createTransaction({
+				user: userId,
+				amount: formData.amount,
+				description: `Withdrawal/247BO/${
 					formData.description ? formData.description : account.accountNumber
 				}`,
-				reference,
-				"pending"
-			);
+				reference: reference,
+				status: "pending",
+			});
 			res.status(201).json({
 				message: "Withdrawal request created",
 				data: withdrawal,
 				status: true,
 			});
-		}else{
-      createTransaction(
-				userId,
-				formData.amount,
-				`Withdrawal/247BO/${
+		} else {
+			await createTransaction({
+				user: userId,
+				amount: formData.amount,
+				description: `Withdrawal/247BO/${
 					formData.description ? formData.description : account.accountNumber
 				}`,
-				reference,
-				"failed"
-			);
-    }
+				reference: reference,
+				status: "failed",
+			});
+		}
 	} catch (error) {
-		console.log(error);
+		// console.log(error);
 		res.status(500).json({
 			message: "Error initiating withdrawal",
 			data: error,
@@ -148,11 +149,19 @@ export const getSingleWithdrawal = async (req, res) => {
 export const approveWithdrawal = async (req, res) => {
 	try {
 		const withdrawal = await Withdrawal.findById(req.params.id);
+		const transaction = await Transaction.findOne({
+			reference: withdrawal.reference,
+		});
 		if (!withdrawal || withdrawal.status !== "pending") {
 			return res.status(400).json({ message: "Invalid withdrawal request" });
 		}
 		withdrawal.status = "approved";
 		await withdrawal.save();
+		await Transaction.findByIdAndUpdate(
+			transaction._id,
+			{ status: "completed" },
+			{ new: true }
+		);
 		res.status(200).json({ message: "Withdrawal approved", withdrawal });
 	} catch (error) {
 		res.status(500).json({ message: "Error approving withdrawal", error });
@@ -162,11 +171,19 @@ export const approveWithdrawal = async (req, res) => {
 export const declineWithdrawal = async (req, res) => {
 	try {
 		const withdrawal = await Withdrawal.findById(req.params.id);
+		const transaction = await Transaction.findOne({
+			reference: withdrawal.reference,
+		});
 		if (!withdrawal || withdrawal.status !== "pending") {
 			return res.status(400).json({ message: "Invalid withdrawal request" });
 		}
 		withdrawal.status = "declined";
 		await withdrawal.save();
+		await Transaction.findByIdAndUpdate(
+			transaction._id,
+			{ status: "failed" },
+			{ new: true }
+		);
 		res.status(200).json({ message: "Withdrawal declined", withdrawal });
 	} catch (error) {
 		res.status(500).json({ message: "Error declining withdrawal", error });
@@ -198,7 +215,7 @@ export const sendOTP = async (req, res) => {
 				data: null,
 			});
 		}
-		console.log("email: ", user.email);
+		// console.log("email: ", user.email);
 		await sendMail(
 			user.email,
 			"OTP Verification For Withdrawal",
