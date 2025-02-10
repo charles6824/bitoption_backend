@@ -2,7 +2,7 @@ import cron from "node-cron";
 import Investment from "./models/investment.js";
 
 // Daily Update Job
-cron.schedule("* * * * *", async () => {
+cron.schedule("0 0 * * *", async () => {
   console.log("Running daily investment update...");
   try {
     const investments = await Investment.find({ completed: false });
