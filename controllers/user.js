@@ -5,7 +5,7 @@ import generateToken from "../utils/generateToken.js";
 import randomstring from "randomstring";
 import Account from "../models/account.js";
 import logActivity from "../utils/logActivity.js";
-import { otpMessage } from "../utils/message.js";
+import { contactMessage, feedbackMessage, otpMessage } from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
 import { v4 as uuidv4 } from "uuid";
 import NodeCache from "node-cache";
@@ -275,6 +275,69 @@ const logout = asyncHandler(async (req, res) => {
 	}
 });
 
+const changePassword = asyncHandler(async(req, res) => {
+  try {
+    const formData = req.body.payload
+    const user = await User.findById(req.user.id)
+    const confirmPassword = bcrypt.compareSync(
+			formData.oldPassword,
+			user.password
+		);
+    if(confirmPassword){
+      await User.findByIdAndUpdate(
+				user._id,
+				{
+					password: await bcrypt.hash(formData.newPassword, 10),
+				},
+				{ new: true, useFindAndModify: false }
+			);
+      res.json({status: true, message: "Password Updated Successfully", data: null})
+    }else{
+      res.json({status: true, message: "Old Password does not match", data: null})
+    }
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+})
+
+const sendFeedback = asyncHandler(async(req, res) => {
+  try {
+    const formData = req.body.payload
+    const {feedbackType, message} = formData
+    const user = await User.findById(req.user.id)
+
+    await sendMail(
+			"godwindanielgodwin@gmail.com",
+			"Users Feedback from Settings",
+			feedbackMessage(user.fullName, feedbackType, message)
+		);
+
+    res.json({status: true, message: "Message Sent", data: null})
+    
+  } catch (error) {
+		res.status(500).json({ status: false, message: error.message });
+  }
+})
+
+const contactUsMessage = asyncHandler(async(req, res) => {
+  try {
+    const formData = req.body.payload
+    const {firstName, lastName, email, subject, message} = formData
+
+    await sendMail(
+			"godwindanielgodwin@gmail.com",
+			"Contact Form Feedback",
+			contactMessage(firstName, lastName, email, subject, message)
+		);
+
+    res.json({status: true, message: "Message Sent", data: null})
+    
+  } catch (error) {
+		res.status(500).json({ status: false, message: error.message });
+  }
+})
+
+
 export {
 	registerUser,
 	authUser,
@@ -282,4 +345,7 @@ export {
 	verifyOtp,
 	resetPassword,
 	logout,
+  changePassword,
+  contactUsMessage,
+  sendFeedback
 };

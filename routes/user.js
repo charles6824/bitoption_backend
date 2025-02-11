@@ -1,12 +1,16 @@
 import express from "express";
 import {
   authUser,
+  changePassword,
+  contactUsMessage,
   logout,
   registerUser,
   resetPassword,
+  sendFeedback,
   validateAccount,
   verifyOtp,
 } from "../controllers/user.js";
+import { protect, user } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -205,5 +209,9 @@ router.post("/reset-password", resetPassword);
  *         description: Unauthorized
  */
 router.post("/logout", logout);
+
+router.post("/change-password", protect, changePassword)
+router.post("/send-feedback", protect, user, sendFeedback)
+router.post("/contact-message", contactUsMessage)
 
 export default router;
