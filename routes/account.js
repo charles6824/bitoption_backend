@@ -11,29 +11,6 @@ const router = express.Router();
  *   description: account management is a module that allows users see their current balance, get Account information and generate more accounts
  */
 
-/**
- * @swagger
- * /api/accounts/{accountNumber}:
- *   get:
- *     summary: Get a single package
- *     tags: [Account Management]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: accountNumber
- *         required: true
- *         schema:
- *           type: string
- *         description: The Account number
- *     responses:
- *       200:
- *         description: Account details retrieved successfully
- *       404:
- *         description: Account not found
- */
-router.get("/:accountNumber", protect, getAccountDetailsByAccountNumber)
-
 
 /**
  * @swagger
@@ -94,6 +71,29 @@ router.get("/balance", protect, user, getBalance);
  *         description: Unauthorized (e.g., invalid or expired token)
  */
 router.get("/details", protect, user, getAccountDetails); 
+
+/**
+ * @swagger
+ * /api/accounts/{accountNumber}:
+ *   get:
+ *     summary: Get a single package
+ *     tags: [Account Management]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: accountNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Account number
+ *     responses:
+ *       200:
+ *         description: Account details retrieved successfully
+ *       404:
+ *         description: Account not found
+ */
+router.get("/:accountNumber", protect, getAccountDetailsByAccountNumber)
 
 
 
