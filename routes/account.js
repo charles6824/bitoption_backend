@@ -1,5 +1,5 @@
 import express from "express";
-import { getAccountDetails, getBalance } from "../controllers/account.js";
+import { getAccountDetails, getAccountDetailsByAccountNumber, getBalance } from "../controllers/account.js";
 import { protect, user } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -69,5 +69,28 @@ router.get("/balance", protect, user, getBalance);
  *         description: Unauthorized (e.g., invalid or expired token)
  */
 router.get("/details", protect, user, getAccountDetails); 
+
+/**
+ * @swagger
+ * /api/accounts/{accountNumber}:
+ *   get:
+ *     summary: Get a single package
+ *     tags: [Account Management]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: accountNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Account number
+ *     responses:
+ *       200:
+ *         description: Account details retrieved successfully
+ *       404:
+ *         description: Account not found
+ */
+router.get("/details/:accountNumber", protect, getAccountDetailsByAccountNumber)
 
 export default router;

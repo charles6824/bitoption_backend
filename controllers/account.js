@@ -19,6 +19,22 @@ export const getBalance = asyncHandler(async (req, res) => {
 
 
 
+export const getAccountDetailsByAccountNumber = asyncHandler(async (req, res) => {
+  try {
+    const account = await Account.findOne({ accountNumber:  req.params.accountNumber});
+    console.log(account)
+    console.log(req.params.accountNumber)
+    if (account) {
+      res.json({data: account, message: "Account Retrieved", status: false});
+    } else {
+      res.json({data: null, message: "Account not found for the authenticated user", status: false})
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 export const getAccountDetails = asyncHandler(async (req, res) => {
   try {
     const account = await Account.findOne({ user: req.user._id });
