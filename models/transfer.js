@@ -1,15 +1,33 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
-const transactionSchema = mongoose.Schema(
-  {
+const transferSchema = mongoose.Schema(
+	{
 		user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    
-  },
-  {
-    timestamps: true,
-  }
+		amount: { type: Number, required: true },
+		status: {
+			type: String,
+			enum: ["pending", "completed", "failed"],
+			default: "pending",
+		},
+		reference: {
+			type: String,
+			required: true,
+			unique: true,
+		},
+		accountNumber: {
+			type: String,
+			required: true,
+		},
+		description: {
+			type: String,
+			required: true,
+		},
+	},
+	{
+		timestamps: true,
+	}
 );
 
-const Transaction = mongoose.model('Transaction', transactionSchema)
+const Transfer = mongoose.model("Transfer", transferSchema);
 
-export default Transaction
+export default Transfer;

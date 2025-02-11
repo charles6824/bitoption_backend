@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import Deposit from "../models/deposit.js";
 import { createTransaction } from "../utils/transactions.js";
 import Transaction from "../models/transaction.js";
+import Account from "../models/account.js";
 
 // Fund Wallet (Admin)
 export const fundWallet = asyncHandler(async (req, res) => {
@@ -126,6 +127,7 @@ export const approveFunding = async (req, res) => {
 		const { depositId } = req.params;
 
 		const transactionDeposit = await Deposit.findById(depositId);
+		const account = await Account.findOne({ user: transactionDeposit.user });
 		const deposit = await Deposit.findByIdAndUpdate(
 			depositId,
 			{ status: "approved" },
@@ -141,6 +143,12 @@ export const approveFunding = async (req, res) => {
 				status: false,
 				data: null,
 			});
+
+		await Account.findByIdAndUpdate(
+			account._id,
+			{ balance: Number(account.balance) + Number(transactionDeposit.amount) },
+			{ new: true }
+		);
 
 		await Transaction.findByIdAndUpdate(
 			transaction._id,

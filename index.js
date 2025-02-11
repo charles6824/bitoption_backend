@@ -12,6 +12,7 @@ import investmentRoute from "./routes/investment.js";
 import withdrawalRoute from "./routes/withdrawal.js";
 import transactionRoute from "./routes/transaction.js";
 import depositRoute from "./routes/deposit.js";
+import transferRoute from "./routes/transfer.js";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import './cronJob.js'
@@ -104,6 +105,7 @@ app.use("/api/investments", investmentRoute);
 app.use("/api/deposit", depositRoute); 
 app.use("/api/withdrawal", withdrawalRoute);
 app.use("/api/transaction", transactionRoute);
+app.use("/api/transfer", transferRoute);
 
 app.use(notFound);
 app.use(errorHandler);
@@ -112,5 +114,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(
 	PORT,
-	console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
+	console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`) 
 );

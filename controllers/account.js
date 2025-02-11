@@ -1,11 +1,12 @@
 import asyncHandler from "express-async-handler";
 import Account from "../models/account.js";
+import User from "../models/user.js";
 
 
 export const getBalance = asyncHandler(async (req, res) => {
   try {
     // console.log(req.headers.authorization);
-    const account = await Account.findOne({ user: req.user._id });
+    const account = await Account.findOne({ user: req.user.id });
     if (account) {
       res.status(200).json({ balance: account.balance });
     } else {
@@ -21,16 +22,14 @@ export const getBalance = asyncHandler(async (req, res) => {
 
 export const getAccountDetailsByAccountNumber = asyncHandler(async (req, res) => {
   try {
-    const account = await Account.findOne({ accountNumber:  req.params.accountNumber});
-    console.log(account)
-    console.log(req.params.accountNumber)
+    const account = await User.findOne({ accountNumber:  req.params.accountNumber});
     if (account) {
-      res.json({data: account, message: "Account Retrieved", status: false});
+      res.json({data: account.fullName, message: "Account Retrieved", status: true});
     } else {
       res.json({data: null, message: "Account not found for the authenticated user", status: false})
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message  });
   }
 });
 

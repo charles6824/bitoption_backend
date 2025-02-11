@@ -173,6 +173,7 @@ export const approveWithdrawal = async (req, res) => {
 export const declineWithdrawal = async (req, res) => {
 	try {
 		const withdrawal = await Withdrawal.findById(req.params.id);
+    const account = await Account.findOne({user: withdrawal.user})
 		const transaction = await Transaction.findOne({
 			reference: withdrawal.reference,
 		});
@@ -186,6 +187,12 @@ export const declineWithdrawal = async (req, res) => {
 			{ status: "failed" },
 			{ new: true }
 		);
+		await Account.findByIdAndUpdate(
+			account._id,
+			{ balance: Number(account.balance) + Number(withdrawal.amount) },
+			{ new: true }
+		);
+
 		res.status(200).json({ message: "Withdrawal declined", withdrawal });
 	} catch (error) {
 		res.status(500).json({ message: "Error declining withdrawal", error });
