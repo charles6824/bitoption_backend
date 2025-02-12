@@ -34,13 +34,6 @@ const router = express.Router()
  *                     type: string
  *                   accountNumber:
  *                     type: string
- *                   narration:
- *                     type: string
- *                   userId:
- *                     type: string
- *                   method:
- *                     type: string
- *                     example: "wallet"
  *     responses:
  *       201:
  *         description: Wallet funded successfully

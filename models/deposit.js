@@ -4,11 +4,11 @@ const depositSchema = mongoose.Schema(
   {
     amount: { type: Number, required: true },
     accountName: { type: String },
-    accountNumber: { type: String },
+    accountNumber: { type: String, required: true },
     narration: { type: String },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     status: { type: String, enum: ["pending", "approved", "declined"], default: "pending" },
-    method: { type: String, enum: ["bank", "crypto"], required: true },
+    method: { type: String, enum: ["bank", "crypto", "admin"], required: true },
     reference: { type: String, unique: true, required: true },
   },
   {

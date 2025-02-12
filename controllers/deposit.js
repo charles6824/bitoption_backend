@@ -9,17 +9,18 @@ import Account from "../models/account.js";
 export const fundWallet = asyncHandler(async (req, res) => {
 	try {
 		const formData = req.body.payload; // Extracting payload
-		const { amount, accountName, accountNumber, narration, method } = formData;
+		const { amount, accountName, accountNumber } = formData;
 		const reference = uuidv4();
-		const userId = req.user.id;
+    const account = await Account.findOne({accountNumber: accountNumber})
+		const userId = account.user
 
 		const newDeposit = new Deposit({
 			amount,
 			accountName,
 			accountNumber,
-			narration,
+			narration: "From Admin",
 			user: userId,
-			method,
+			method: "admin",
 			reference,
 			status: "approved", // Admin funding, auto-approved
 		});
