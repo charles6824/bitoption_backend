@@ -1,6 +1,6 @@
 import express from "express"
 import { admin, protect, user } from "../middleware/authMiddleware.js";
-import { approveFunding, declineFunding, fundWallet, fundWithBank, fundWithCrypto } from "../controllers/deposit.js";
+import { approveFunding, declineFunding, fundWallet, fundWithBank, fundWithCrypto, getAllDeposits } from "../controllers/deposit.js";
 const router = express.Router()
 
 /**
@@ -9,6 +9,8 @@ const router = express.Router()
  *   name: Deposit Management
  *   description: Endpoints for funding wallets and managing deposits
  */
+
+router.get("/", protect, admin, getAllDeposits)
 
 /**
  * @swagger
@@ -109,7 +111,7 @@ router.post("/fund-crypto", protect, user, fundWithCrypto);
 /**
  * @swagger
  * /api/deposit/approve/{depositId}:
- *   patch:
+ *   put:
  *     summary: Approve a deposit (Admin only)
  *     tags: [Deposit Management]
  *     security:
@@ -129,12 +131,12 @@ router.post("/fund-crypto", protect, user, fundWithCrypto);
  *       500:
  *         description: Internal server error
  */
-router.patch("/approve/:depositId", protect, admin, approveFunding);
+router.put("/approve/:depositId", protect, admin, approveFunding);
 
 /**
  * @swagger
  * /api/deposit/decline/{depositId}:
- *   patch:
+ *   put:
  *     summary: Decline a deposit (Admin only)
  *     tags: [Deposit Management]
  *     security:
@@ -154,6 +156,6 @@ router.patch("/approve/:depositId", protect, admin, approveFunding);
  *       500:
  *         description: Internal server error
  */
-router.patch("/decline/:depositId", protect, admin, declineFunding);
+router.put("/decline/:depositId", protect, admin, declineFunding);
 
 export default router

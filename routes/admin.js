@@ -1,5 +1,6 @@
 import express from "express";
-import { authAdmin, createAdmin } from "../controllers/admin.js";
+import { authAdmin, changePassword, createAdmin } from "../controllers/admin.js";
+import { admin, protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -76,5 +77,7 @@ router.post("/register", createAdmin);
  *         description: Admin not found
  */
 router.post("/auth", authAdmin);
+
+router.put("/change-password", protect, admin, changePassword)
 
 export default router;

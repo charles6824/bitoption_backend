@@ -3,14 +3,16 @@ import {
   authUser,
   changePassword,
   contactUsMessage,
+  getAllUsers,
   logout,
   registerUser,
   resetPassword,
   sendFeedback,
+  updateUserStatus,
   validateAccount,
   verifyOtp,
 } from "../controllers/user.js";
-import { protect, user } from "../middleware/authMiddleware.js";
+import { admin, protect, user } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -20,6 +22,9 @@ const router = express.Router();
  *   name: Users
  *   description: User authentication and account management
  */
+
+router.get("/", protect, admin, getAllUsers)
+router.put("/:id", protect, admin, updateUserStatus)
 
 /**
  * @swagger

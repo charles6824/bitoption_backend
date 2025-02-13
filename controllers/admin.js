@@ -102,3 +102,28 @@ export const logout = asyncHandler(async (req, res) => {
 		res.status(500).json({ status: false, message: err.message });
 	}
 });
+
+export const changePassword = asyncHandler(async(req, res) => {
+  try {
+    const formData = req.body.payload
+    const admin = await Admin.findById(req.admin.id)
+    const confirmPassword = bcrypt.compareSync(
+			formData.oldPassword,
+			admin.password
+		);
+    if(confirmPassword){
+      await Admin.findByIdAndUpdate(
+				admin._id,
+				{
+					password: await bcrypt.hash(formData.newPassword, 10),
+				},
+				{ new: true, useFindAndModify: false }
+			);
+      res.json({status: true, message: "Password Updated Successfully", data: null})
+    }else{
+      res.json({status: true, message: "Old Password does not match", data: null})
+    }
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+})

@@ -60,7 +60,7 @@ export const updatePackage = asyncHandler(async (req, res) => {
 
 export const deletePackage = asyncHandler(async (req, res) => {
   try {
-      const id = req.params;
+      const id = req.params.id;
       const deletedPackage = await Package.findByIdAndDelete(id);
       
       if (!deletedPackage) {

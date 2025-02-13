@@ -148,7 +148,7 @@ router.get("/:id", protect, user, getSinglePackage);
  *       404:
  *         description: Package not found
  */
-router.put("/:id", protect, user, updatePackage);
+router.put("/:id", protect, admin, updatePackage);
 
 /**
  * @swagger
@@ -173,6 +173,6 @@ router.put("/:id", protect, user, updatePackage);
  *       404:
  *         description: Package not found
  */
-router.delete("/:id", protect, user, deletePackage);
+router.delete("/:id", protect, admin, deletePackage);
 
 export default router;

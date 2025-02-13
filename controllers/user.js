@@ -102,6 +102,11 @@ const authUser = asyncHandler(async (req, res) => {
 			return res.json({ status: false, message: "User not found", data: null });
 		}
 
+		if (user.status !== "Active") {
+			return res.json({ status: false, message: "User Account Disabled. please contact Admin", data: null });
+		}
+
+
 		const confirmPassword = bcrypt.compareSync(
 			formData.password,
 			user.password
@@ -337,6 +342,45 @@ const contactUsMessage = asyncHandler(async(req, res) => {
   }
 })
 
+const getAllUsers = asyncHandler(async(req, res) => {
+  try {
+    const users = await User.find({})
+    if(users){
+      res.json({status: true, message: "users retrieved", data: users})
+    }else{
+      res.json({status: false, message: "unable to retrieve users", data: null})
+    }
+  } catch (error) {
+		res.status(500).json({ status: false, message: error.data.message });
+  }
+})
+
+const updateUserStatus = asyncHandler(async(req, res) => {
+  try {
+    const id = req.params.id
+    const user = await User.findById(id)
+    if(!user){
+      return res.json({ status: false, message: "User not found", data: null });
+    }
+
+    const updateUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        status: user.status === "Active" ? "Blocked" : "Active"
+      },
+      { new: true, useFindAndModify: false }
+    );
+
+    if(!updateUser){
+      res.json({status: false, message: "unable to update user's status", data: null})
+    }
+
+    res.json({data: null, status: true, message: "User Status Updated successfully"})
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.data.message });
+  }
+})
+
 
 export {
 	registerUser,
@@ -347,5 +391,7 @@ export {
 	logout,
   changePassword,
   contactUsMessage,
-  sendFeedback
+  sendFeedback,
+  getAllUsers,
+  updateUserStatus
 };
