@@ -5,7 +5,7 @@ import generateToken from "../utils/generateToken.js";
 import randomstring from "randomstring";
 import Account from "../models/account.js";
 import logActivity from "../utils/logActivity.js";
-import { contactMessage, feedbackMessage, otpMessage, registerMessage } from "../utils/message.js";
+import { contactMessage, feedbackMessage, loginMessage, otpMessage, registerMessage } from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
 import { v4 as uuidv4 } from "uuid";
 import NodeCache from "node-cache";
@@ -135,7 +135,11 @@ const authUser = asyncHandler(async (req, res) => {
 				userDetails,
 				accountDetails,
 			};
-
+      await sendMail(
+        user.email,
+        "Login Notification",
+        loginMessage(user.fullName, user.lastLogin[user.lastLogin.length - 1])
+      );
 			res.json({ status: true, message: "Login Successful", data: response });
 		} else {
 			res.json({ status: false, message: "Wrong Credentials", data: null });
