@@ -1,7 +1,11 @@
-import express from "express"
+import express from "express";
 import { admin, protect, user } from "../middleware/authMiddleware.js";
-import { createInvestment, getAllInvestments, getUserInvestments } from "../controllers/investment.js";
-const router = express.Router()
+import {
+	createInvestment,
+	getAllInvestments,
+	getUserInvestments,
+} from "../controllers/investment.js";
+const router = express.Router();
 
 /**
  * @swagger
@@ -82,10 +86,9 @@ const router = express.Router()
  *                   type: string
  *                   example: Error creating investment
  */
- router.post("/", protect, user, createInvestment)
+router.post("/", protect, user, createInvestment);
 
-
- /**
+/**
  * @swagger
  * /api/investments:
  *   get:
@@ -99,9 +102,9 @@ const router = express.Router()
  *       500:
  *         description: Server error
  */
- router.get("/", protect, user, getAllInvestments)
+router.get("/", protect, admin, getAllInvestments);
 
- /**
+/**
  * @swagger
  * /api/investments/user:
  *   get:
@@ -115,7 +118,6 @@ const router = express.Router()
  *       500:
  *         description: Server error
  */
- router.get("/user", protect, user, getUserInvestments)
+router.get("/user", protect, user, getUserInvestments);
 
-
-export default router
+export default router;

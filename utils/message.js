@@ -111,8 +111,8 @@ export const otpMessage = (name, otp) => {
 
 export const loginMessage = () => {};
 
-export const registerMessage = () => {
-  return `
+export const registerMessage = (name) => {
+	return `
   <!DOCTYPE html>
   <html lang="en">
       <head>
@@ -206,13 +206,26 @@ export const registerMessage = () => {
               <div class="message">
                   <h4 class="salutation">Dear ${name},</h4>
                   <p class="m-text">
-                  use ${otp} as your otp code to validate your withdrawal
+                 A warm welcome to 247Bitoption.com
                   </p>
+
+                  <p>We're thrilled to have you on board! Your registration is now complete, and you're all set to start exploring our platform.</p>
+                  <p>Here's what you can expect:</p>
+                  <ul>
+                    <li>Secure and lightning-fast Bitcoin transactions with low fees</li>
+                    <li>Grow your wealth by investing in Bitcoin.</li>
+                    <li>Secured transactions with advanced encryption.</li>
+                  </ul>
+
+                  <h4>Need help?</h4>
+                  <p class="m-text">If you have any questions or need assistance, please contact our support team at info@247bitoption.com</p>
+
+                  <p>Thank you for choosing 247Bitoption! We're excited to have you as part of our community.</p>
   
               </div>
               <div class="footer">
                   <p>
-                  Thank you.
+                  Best Regards
                   </p>
               </div>
           </div>
@@ -332,7 +345,13 @@ export const withdrawalOTP = (name, otp) => {
   
               `;
 };
-export const contactMessage = (firstName, lastName, email, subject, message) => {
+export const contactMessage = (
+	firstName,
+	lastName,
+	email,
+	subject,
+	message
+) => {
 	return `
   <!DOCTYPE html>
   <html lang="en">
@@ -449,7 +468,6 @@ export const contactMessage = (firstName, lastName, email, subject, message) => 
   
               `;
 };
-
 
 export const feedbackMessage = (name, feedbackType, message) => {
 	return `

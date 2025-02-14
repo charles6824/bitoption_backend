@@ -5,7 +5,7 @@ import generateToken from "../utils/generateToken.js";
 import randomstring from "randomstring";
 import Account from "../models/account.js";
 import logActivity from "../utils/logActivity.js";
-import { contactMessage, feedbackMessage, otpMessage } from "../utils/message.js";
+import { contactMessage, feedbackMessage, otpMessage, registerMessage } from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
 import { v4 as uuidv4 } from "uuid";
 import NodeCache from "node-cache";
@@ -68,6 +68,12 @@ const registerUser = asyncHandler(async (req, res) => {
 					accountDetails: saveAccount,
 					userDetails: saveDetails,
 				};
+
+        await sendMail(
+          saveUser.email,
+          "Welcome to Bitoption",
+          registerMessage(saveUser.fullName)
+        );
 
 				res.json({
 					status: true,

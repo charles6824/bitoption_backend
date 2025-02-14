@@ -1,7 +1,14 @@
 import express from "express";
-import { approveWithdrawal, declineWithdrawal, getAllWithdrawals, getSingleWithdrawal, getUserWithdrawals, initiateWithdrawal, sendOTP } from "../controllers/withdrawal.js";
+import {
+	approveWithdrawal,
+	declineWithdrawal,
+	getAllWithdrawals,
+	getSingleWithdrawal,
+	getUserWithdrawals,
+	initiateWithdrawal,
+	sendOTP,
+} from "../controllers/withdrawal.js";
 import { admin, protect, user } from "../middleware/authMiddleware.js";
-
 
 const router = express.Router();
 
@@ -11,52 +18,6 @@ const router = express.Router();
  *   name: Withdrawals
  *   description: Endpoints for managing withdrawals
  */
-
-/**
- * @swagger
- * /api/withdrawal/initiate:
- *   post:
- *     summary: Initiate a withdrawal request
- *     tags: [Withdrawals]
- *     security:
- *       - BearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               payload:
- *                 type: object
- *                 properties:
- *                   amount:
- *                     type: number
- *                   mode:
- *                     type: string
- *                     enum: [crypto, bank]
- *                   description:
- *                     type: string
- *                   cryptoWallet:
- *                     type: string
- *                   bankDetails:
- *                     type: object
- *                     properties:
- *                       accountNumber:
- *                         type: string
- *                       accountName:
- *                         type: string
- *                       bankName:
- *                         type: string
- *     responses:
- *       201:
- *         description: Withdrawal request created successfully
- *       400:
- *         description: Invalid withdrawal amount
- *       500:
- *         description: Server error
- */
-router.post("/initiate", protect, initiateWithdrawal);
 
 /**
  * @swagger
@@ -73,38 +34,6 @@ router.post("/initiate", protect, initiateWithdrawal);
  *         description: Server error
  */
 router.get("/", protect, admin, getAllWithdrawals);
-
-/**
- * @swagger
- * /api/withdrawal/user:
- *   get:
- *     summary: Get all withdrawals for the logged-in user
- *     tags: [Withdrawals]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: List of user withdrawals
- *       500:
- *         description: Server error
- */
-router.get("/user", protect, getUserWithdrawals);
-
-/**
- * @swagger
- * /api/withdrawal/verify-otp:
- *   get:
- *     summary: Verify OTP for Withdrawal
- *     tags: [Withdrawals]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: List of user withdrawals
- *       500:
- *         description: Server error
- */
-router.get("/verify-otp", protect, user, sendOTP)
 
 /**
  * @swagger
@@ -181,5 +110,82 @@ router.put("/:id/approve", protect, admin, approveWithdrawal);
  */
 router.put("/:id/decline", protect, admin, declineWithdrawal);
 
+/**
+ * @swagger
+ * /api/withdrawal/initiate:
+ *   post:
+ *     summary: Initiate a withdrawal request
+ *     tags: [Withdrawals]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               payload:
+ *                 type: object
+ *                 properties:
+ *                   amount:
+ *                     type: number
+ *                   mode:
+ *                     type: string
+ *                     enum: [crypto, bank]
+ *                   description:
+ *                     type: string
+ *                   cryptoWallet:
+ *                     type: string
+ *                   bankDetails:
+ *                     type: object
+ *                     properties:
+ *                       accountNumber:
+ *                         type: string
+ *                       accountName:
+ *                         type: string
+ *                       bankName:
+ *                         type: string
+ *     responses:
+ *       201:
+ *         description: Withdrawal request created successfully
+ *       400:
+ *         description: Invalid withdrawal amount
+ *       500:
+ *         description: Server error
+ */
+router.post("/initiate", protect, initiateWithdrawal);
+
+/**
+ * @swagger
+ * /api/withdrawal/user:
+ *   get:
+ *     summary: Get all withdrawals for the logged-in user
+ *     tags: [Withdrawals]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user withdrawals
+ *       500:
+ *         description: Server error
+ */
+router.get("/user", protect, getUserWithdrawals);
+
+/**
+ * @swagger
+ * /api/withdrawal/verify-otp:
+ *   get:
+ *     summary: Verify OTP for Withdrawal
+ *     tags: [Withdrawals]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user withdrawals
+ *       500:
+ *         description: Server error
+ */
+router.get("/verify-otp", protect, user, sendOTP);
 
 export default router;

@@ -151,12 +151,19 @@ export const getSingleWithdrawal = async (req, res) => {
 export const approveWithdrawal = async (req, res) => {
 	try {
 		const withdrawal = await Withdrawal.findById(req.params.id);
-		const transaction = await Transaction.findOne({
+    console.log("withdrawal: ", withdrawal)
+
+		if (!withdrawal || withdrawal.status !== "pending") {
+			return res.json({ message: "Invalid withdrawal request", status: false, data: null });
+		}
+
+    if(withdrawal){}
+    const transaction = await Transaction.findOne({
 			reference: withdrawal.reference,
 		});
-		if (!withdrawal || withdrawal.status !== "pending") {
-			return res.status(400).json({ message: "Invalid withdrawal request" });
-		}
+
+    console.log("transaction: ", transaction)
+
 		withdrawal.status = "approved";
 		await withdrawal.save();
 		await Transaction.findByIdAndUpdate(
@@ -164,7 +171,7 @@ export const approveWithdrawal = async (req, res) => {
 			{ status: "completed" },
 			{ new: true }
 		);
-		res.status(200).json({ message: "Withdrawal approved", withdrawal });
+		res.status(200).json({ message: "Withdrawal approved", data: null, status: true });
 	} catch (error) {
 		res.status(500).json({ message: "Error approving withdrawal", error });
 	}
@@ -174,12 +181,13 @@ export const declineWithdrawal = async (req, res) => {
 	try {
 		const withdrawal = await Withdrawal.findById(req.params.id);
     const account = await Account.findOne({user: withdrawal.user})
-		const transaction = await Transaction.findOne({
+		
+		if (!withdrawal || withdrawal.status !== "pending") {
+			return res.json({ message: "Invalid withdrawal request", status: false, data: null });
+		}
+    const transaction = await Transaction.findOne({
 			reference: withdrawal.reference,
 		});
-		if (!withdrawal || withdrawal.status !== "pending") {
-			return res.status(400).json({ message: "Invalid withdrawal request" });
-		}
 		withdrawal.status = "declined";
 		await withdrawal.save();
 		await Transaction.findByIdAndUpdate(
@@ -193,7 +201,7 @@ export const declineWithdrawal = async (req, res) => {
 			{ new: true }
 		);
 
-		res.status(200).json({ message: "Withdrawal declined", withdrawal });
+		res.status(200).json({ message: "Withdrawal declined", data: null, status: true });
 	} catch (error) {
 		res.status(500).json({ message: "Error declining withdrawal", error });
 	}
