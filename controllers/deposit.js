@@ -120,8 +120,7 @@ export const fundWithCrypto = async (req, res) => {
 		const { amount, narration } = formData;
 		const reference = uuidv4();
 		const userId = req.user.id;
-
-		const newDeposit = new Deposit({
+		const newDeposit = await new Deposit({
 			amount,
 			user: userId,
 			method: "crypto",
@@ -130,22 +129,26 @@ export const fundWithCrypto = async (req, res) => {
 			status: "pending",
 		});
 
-		await newDeposit.save();
-		await createTransaction({
-			user: userId,
-			amount: amount,
-			description: `Deposit/247BO/${
-				narration ? narration : accountNumber
-			} crypto`,
-			reference: reference,
-			status: "pending",
-			type: "inflow",
-		});
-		return res.json({
-			message: "Crypto deposit request created",
-			data: newDeposit,
-			status: true,
-		});
+		const saveDep = await newDeposit.save();
+		if (saveDep) {
+		console.log("saveDep: ", saveDep);
+      
+			await createTransaction({
+				user: userId,
+				amount: amount,
+				description: `Deposit/247BO/${
+					narration ? narration : accountNumber
+				} crypto`,
+				reference: reference,
+				status: "pending",
+				type: "inflow",
+			});
+			return res.json({
+				message: "Crypto deposit request created",
+				data: newDeposit,
+				status: true,
+			});
+		}
 	} catch (error) {
 		return res.status(500).json({
 			message: "Error processing crypto deposit",
@@ -223,13 +226,11 @@ export const declineFunding = async (req, res) => {
 			{ status: "failed" },
 			{ new: true }
 		);
-		return res
-			.status(200)
-			.json({
-				message: "Deposit declined successfully",
-				data: deposit,
-				status: true,
-			});
+		return res.status(200).json({
+			message: "Deposit declined successfully",
+			data: deposit,
+			status: true,
+		});
 	} catch (error) {
 		return res.status(500).json({ message: "Error declining deposit", error });
 	}
