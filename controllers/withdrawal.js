@@ -14,8 +14,8 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 		const formData = req.body.payload;
 		const userId = req.user.id;
 
-		const userAccount = await User.findOne({ _id: userId });
-		const account = await Account.findOne({ user: userId });
+		const userAccount = await User.findOne({ _id: req.user.id });
+		const account = await Account.findOne({ user: req.user.id });
 		// console.log(userAccount);
 
 		if (!formData.amount || formData.amount > userAccount.balance) {
@@ -33,7 +33,7 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 		const reference = uuidv4();
 
 		const withdrawal = new Withdrawal({
-			user: userId,
+			user: req.user.id,
 			amount: formData.amount,
 			mode: formData.mode,
 			reference: reference,
@@ -91,7 +91,7 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 
 export const getAllWithdrawals = async (req, res) => {
 	try {
-		const withdrawals = await Withdrawal.find({});
+		const withdrawals = await Withdrawal.find({}).sort({ createdAt: -1 });;
 		if (withdrawals) {
 			res.json({ data: withdrawals, message: "Retrieved", status: true });
 		} else {
@@ -108,7 +108,7 @@ export const getAllWithdrawals = async (req, res) => {
 
 export const getUserWithdrawals = async (req, res) => {
 	try {
-		const withdrawals = await Withdrawal.find({ user: req.user.id });
+		const withdrawals = await Withdrawal.find({ user: req.user.id }).sort({ createdAt: -1 });;
 		if (withdrawals) {
 			res.json({
 				data: withdrawals,

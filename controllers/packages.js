@@ -20,7 +20,7 @@ export const createPackage = asyncHandler(async (req, res) => {
 // Get all packages
 export const getAllPackages = asyncHandler(async (req, res) => {
   try {
-      const packages = await Package.find();
+      const packages = await Package.find({}).sort({ createdAt: -1 });;
       res.json({ status: true, data: packages, message: "" });
   } catch (err) {
       res.status(500).json({ status: false, message: err.message });

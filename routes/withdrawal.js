@@ -146,6 +146,8 @@ router.put("/:id/decline", protect, admin, declineWithdrawal);
  *                         type: string
  *                       bankName:
  *                         type: string
+ *                       routing:
+ *                         type: string
  *     responses:
  *       201:
  *         description: Withdrawal request created successfully

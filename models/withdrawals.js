@@ -16,11 +16,12 @@ const withdrawalSchema = new mongoose.Schema(
 		},
     mode: { type: String, enum: ["crypto", "bank"], required: true },
     description: { type: String },
-    cryptoWallet: { type: String, required: function () { return this.mode === "crypto"; } },
+    cryptoWallet: { type: String },
     bankDetails: {
-      accountNumber: { type: String, required: function () { return this.mode === "bank"; } },
-      accountName: { type: String, required: function () { return this.mode === "bank"; } },
-      bankName: { type: String, required: function () { return this.mode === "bank"; } },
+      accountNumber: { type: String },
+      accountName: { type: String },
+      bankName: { type: String },
+      routing: { type: String },
     },
   },
   { timestamps: true }

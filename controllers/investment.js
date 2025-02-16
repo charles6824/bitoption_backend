@@ -91,7 +91,7 @@ export const createInvestment = async (req, res) => {
 };
 export const getAllInvestments = asyncHandler(async(req, res) => {
   try {
-		const investments = await Investment.find({});
+		const investments = await Investment.find({}).sort({ createdAt: -1 });;
 		if (investments) {
 			res.json({ data: investments, message: "Retrieved", status: true });
 		} else {
@@ -107,7 +107,7 @@ export const getAllInvestments = asyncHandler(async(req, res) => {
 })
 export const getUserInvestments = asyncHandler(async(req, res) => {
   try {
-		const investments = await Investment.find({user: req.user.id});
+		const investments = await Investment.find({user: req.user.id}).sort({ createdAt: -1 });;
 		if (investments) {
 			res.json({ data: investments, message: "Retrieved", status: true });
 		} else {

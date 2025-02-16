@@ -8,7 +8,7 @@ import User from "../models/user.js";
 
 export const getAllDeposits = asyncHandler(async (req, res) => {
 	try {
-		const deposits = await Deposit.find({});
+		const deposits = await Deposit.find({}).sort({ createdAt: -1 });;
 		if (deposits) {
 			res.json({ data: deposits, message: "Deposits retrieved", status: true });
 		} else {

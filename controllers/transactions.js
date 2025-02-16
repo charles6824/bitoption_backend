@@ -4,7 +4,7 @@ import asyncHandler from "express-async-handler";
 
 export const getAllTransactions = asyncHandler(async(req, res) => {
   try {
-		const transactions = await Transaction.find({});
+		const transactions = await Transaction.find({}).sort({ createdAt: -1 });
 		if (transactions) {
 			res.json({ data: transactions, message: "Retrieved", status: true });
 		} else {
@@ -20,7 +20,7 @@ export const getAllTransactions = asyncHandler(async(req, res) => {
 })
 export const getUserTransactions = asyncHandler(async(req, res) => {
   try {
-		const transactions = await Transaction.find({user: req.user.id});
+		const transactions = await Transaction.find({user: req.user.id}).sort({ createdAt: -1 });
 		if (transactions) {
 			res.json({ data: transactions, message: "Retrieved", status: true });
 		} else {
@@ -40,6 +40,7 @@ const getDataForPeriod = (transactions, period) => {
   const now = new Date();
   let startDate;
 
+  // Adjust start date based on the period selected
   switch (period) {
     case "1D":
       startDate = new Date(now.setDate(now.getDate() - 1));
@@ -63,19 +64,46 @@ const getDataForPeriod = (transactions, period) => {
       return { labels: [], inflowData: [], outflowData: [] };
   }
 
+  // Filter transactions within the specified period
   const filteredTransactions = transactions.filter(
     (txn) => new Date(txn.date) >= startDate
   );
 
-  const inflowData = filteredTransactions
-    .filter((txn) => txn.type == "inflow")
-    .map((txn) => txn.amount);
-  const outflowData = filteredTransactions
-    .filter((txn) => txn.type == "outflow")
-    .map((txn) => Math.abs(txn.amount));
+  // Group transactions by month and year
+  const monthlyData = filteredTransactions.reduce((acc, txn) => {
+    const date = new Date(txn.date);
+    const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`; // Format: YYYY-MM
+
+    if (!acc[monthYear]) {
+      acc[monthYear] = { inflow: 0, outflow: 0 };
+    }
+
+    if (txn.type === "inflow") {
+      acc[monthYear].inflow += txn.amount;
+    } else if (txn.type === "outflow") {
+      acc[monthYear].outflow += Math.abs(txn.amount);
+    }
+
+    return acc;
+  }, {});
+
+  // Convert month-year format to 'MMM, YYYY' (e.g., "Feb, 2025")
+  const formatMonthYear = (monthYear) => {
+    const [year, month] = monthYear.split("-").map(Number);
+    return `${new Date(year, month - 1).toLocaleString("en-US", { month: "short" })}, ${year}`;
+  };
+
+  // Get last 6 months of data
+  const sortedLabels = Object.keys(monthlyData).sort((a, b) => new Date(a) - new Date(b));
+  const last6Months = sortedLabels.slice(-6);
+
+  // Prepare the labels and data arrays
+  const labels = last6Months.map(formatMonthYear);
+  const inflowData = last6Months.map((label) => monthlyData[label].inflow);
+  const outflowData = last6Months.map((label) => monthlyData[label].outflow);
 
   return {
-    labels: filteredTransactions.map((txn) => txn.date.toISOString().split("T")[0]),
+    labels,
     inflowData,
     outflowData,
   };
