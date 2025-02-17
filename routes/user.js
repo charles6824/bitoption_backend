@@ -27,7 +27,6 @@ const router = express.Router();
 
 router.get("/", protect, admin, getAllUsers)
 router.put("/:id", protect, admin, updateUserStatus)
-router.put("/:id/user", protect, admin, updateUser)
 
 /**
  * @swagger
@@ -219,6 +218,7 @@ router.post("/reset-password", resetPassword);
  *         description: Unauthorized
  */
 router.post("/logout", logout);
+router.put("/profile/:id", protect, admin, updateUser)
 
 router.post("/change-password", protect, changePassword)
 router.post("/send-feedback", protect, user, sendFeedback)

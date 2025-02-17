@@ -5,7 +5,14 @@ import generateToken from "../utils/generateToken.js";
 import randomstring from "randomstring";
 import Account from "../models/account.js";
 import logActivity from "../utils/logActivity.js";
-import { confirmRegistrationMessage, contactMessage, feedbackMessage, loginMessage, otpMessage, registerMessage } from "../utils/message.js";
+import {
+	confirmRegistrationMessage,
+	contactMessage,
+	feedbackMessage,
+	loginMessage,
+	otpMessage,
+	registerMessage,
+} from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
 import { v4 as uuidv4 } from "uuid";
 import NodeCache from "node-cache";
@@ -22,16 +29,16 @@ const registerUser = asyncHandler(async (req, res) => {
 		if (userExist) {
 			res.json({ status: false, message: "User already exists", data: null });
 		} else {
-      const otp = randomstring.generate({
-        length: 6,
-        charset: "numeric",
-      });
+			const otp = randomstring.generate({
+				length: 6,
+				charset: "numeric",
+			});
 			const newUser = await new User({
 				fullName: formData.fullName,
 				email: formData.email,
 				password: await bcrypt.hash(formData.password, 10),
-        status: "Blocked",
-        otp: otp,
+				status: "Blocked",
+				otp: otp,
 			});
 
 			const saveUser = await newUser.save();
@@ -75,11 +82,11 @@ const registerUser = asyncHandler(async (req, res) => {
 					userDetails: saveDetails,
 				};
 
-        await sendMail(
-          saveUser.email,
-          "Registration confirmation",
-          confirmRegistrationMessage(saveUser.fullName , saveUser.otp)
-        );
+				await sendMail(
+					saveUser.email,
+					"Registration confirmation",
+					confirmRegistrationMessage(saveUser.fullName, saveUser.otp)
+				);
 
 				res.json({
 					status: true,
@@ -99,40 +106,47 @@ const registerUser = asyncHandler(async (req, res) => {
 	}
 });
 
-const confirmRegistration = asyncHandler(async(req, res) => {
-  try {
-    const formData = req.body.payload
-    const user = await User.findOne({email: formData.email})
-    if (!user) {
-      return res.json({ status: false, message: "User not found" })
-    }
+const confirmRegistration = asyncHandler(async (req, res) => {
+	try {
+		const formData = req.body.payload;
+		const user = await User.findOne({ email: formData.email });
+		if (!user) {
+			return res.json({ status: false, message: "User not found" });
+		}
 
-    if(user.otp !== formData.otp){
-      return res.json({ status: false, message: "Invalid OTP" })
-    }
+		if (user.otp !== formData.otp) {
+			return res.json({ status: false, message: "Invalid OTP" });
+		}
 
-    const otp = randomstring.generate({
-      length: 6,
-      charset: "numeric",
-    });
+		const otp = randomstring.generate({
+			length: 6,
+			charset: "numeric",
+		});
 
-    await User.findByIdAndUpdate(user._id, {
-      status: "Active",
-      otp: otp
-    }, { new: true, useFindAndModify: false })
+		await User.findByIdAndUpdate(
+			user._id,
+			{
+				status: "Active",
+				otp: otp,
+			},
+			{ new: true, useFindAndModify: false }
+		);
 
-    await sendMail(
-      user.email,
-      "Welcome to Bitoption",
-      registerMessage(user.fullName)
-    );
+		await sendMail(
+			user.email,
+			"Welcome to Bitoption",
+			registerMessage(user.fullName)
+		);
 
-    res.json({status: true, message: "User created successfully", data: null})
-  
-  } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
-  }
-})
+		res.json({
+			status: true,
+			message: "User created successfully",
+			data: null,
+		});
+	} catch (error) {
+		res.status(500).json({ status: false, message: error.message });
+	}
+});
 
 const authUser = asyncHandler(async (req, res) => {
 	try {
@@ -150,9 +164,12 @@ const authUser = asyncHandler(async (req, res) => {
 		}
 
 		if (user.status !== "Active") {
-			return res.json({ status: false, message: "User Account Disabled. please contact Admin", data: null });
+			return res.json({
+				status: false,
+				message: "User Account Disabled. please contact Admin",
+				data: null,
+			});
 		}
-
 
 		const confirmPassword = bcrypt.compareSync(
 			formData.password,
@@ -176,11 +193,11 @@ const authUser = asyncHandler(async (req, res) => {
 				userDetails,
 				accountDetails,
 			};
-      await sendMail(
-        user.email,
-        "Login Notification",
-        loginMessage(user.fullName, user.lastLogin[user.lastLogin.length - 1])
-      );
+			await sendMail(
+				user.email,
+				"Login Notification",
+				loginMessage(user.fullName, user.lastLogin[user.lastLogin.length - 1])
+			);
 			res.json({ status: true, message: "Login Successful", data: response });
 		} else {
 			res.json({ status: false, message: "Wrong Credentials", data: null });
@@ -331,135 +348,155 @@ const logout = asyncHandler(async (req, res) => {
 	}
 });
 
-const changePassword = asyncHandler(async(req, res) => {
-  try {
-    const formData = req.body.payload
-    const user = await User.findById(req.user.id)
-    const confirmPassword = bcrypt.compareSync(
+const changePassword = asyncHandler(async (req, res) => {
+	try {
+		const formData = req.body.payload;
+		const user = await User.findById(req.user.id);
+		const confirmPassword = bcrypt.compareSync(
 			formData.oldPassword,
 			user.password
 		);
-    if(confirmPassword){
-      await User.findByIdAndUpdate(
+		if (confirmPassword) {
+			await User.findByIdAndUpdate(
 				user._id,
 				{
 					password: await bcrypt.hash(formData.newPassword, 10),
 				},
 				{ new: true, useFindAndModify: false }
 			);
-      res.json({status: true, message: "Password Updated Successfully", data: null})
-    }else{
-      res.json({status: true, message: "Old Password does not match", data: null})
-    }
-  } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
-  }
-})
+			res.json({
+				status: true,
+				message: "Password Updated Successfully",
+				data: null,
+			});
+		} else {
+			res.json({
+				status: true,
+				message: "Old Password does not match",
+				data: null,
+			});
+		}
+	} catch (error) {
+		res.status(500).json({ status: false, message: error.message });
+	}
+});
 
-const sendFeedback = asyncHandler(async(req, res) => {
-  try {
-    const formData = req.body.payload
-    const {feedbackType, message} = formData
-    const user = await User.findById(req.user.id)
+const sendFeedback = asyncHandler(async (req, res) => {
+	try {
+		const formData = req.body.payload;
+		const { feedbackType, message } = formData;
+		const user = await User.findById(req.user.id);
 
-    await sendMail(
+		await sendMail(
 			"godwindanielgodwin@gmail.com",
 			"Users Feedback from Settings",
 			feedbackMessage(user.fullName, feedbackType, message)
 		);
 
-    res.json({status: true, message: "Message Sent", data: null})
-    
-  } catch (error) {
+		res.json({ status: true, message: "Message Sent", data: null });
+	} catch (error) {
 		res.status(500).json({ status: false, message: error.message });
-  }
-})
+	}
+});
 
-const contactUsMessage = asyncHandler(async(req, res) => {
-  try {
-    const formData = req.body.payload
-    const {firstName, lastName, email, subject, message} = formData
+const contactUsMessage = asyncHandler(async (req, res) => {
+	try {
+		const formData = req.body.payload;
+		const { firstName, lastName, email, subject, message } = formData;
 
-    await sendMail(
+		await sendMail(
 			"godwindanielgodwin@gmail.com",
 			"Contact Form Feedback",
 			contactMessage(firstName, lastName, email, subject, message)
 		);
 
-    res.json({status: true, message: "Message Sent", data: null})
-    
-  } catch (error) {
+		res.json({ status: true, message: "Message Sent", data: null });
+	} catch (error) {
 		res.status(500).json({ status: false, message: error.message });
-  }
-})
+	}
+});
 
-const getAllUsers = asyncHandler(async(req, res) => {
-  try {
-    const users = await User.find({})
-    if(users){
-      res.json({status: true, message: "users retrieved", data: users})
-    }else{
-      res.json({status: false, message: "unable to retrieve users", data: null})
-    }
-  } catch (error) {
+const getAllUsers = asyncHandler(async (req, res) => {
+	try {
+		const users = await User.find({}).sort({ createdAt: -1 });
+		if (users) {
+			res.json({ status: true, message: "users retrieved", data: users });
+		} else {
+			res.json({
+				status: false,
+				message: "unable to retrieve users",
+				data: null,
+			});
+		}
+	} catch (error) {
 		res.status(500).json({ status: false, message: error.data.message });
-  }
-})
+	}
+});
 
-const updateUserStatus = asyncHandler(async(req, res) => {
-  try {
-    const id = req.params.id
-    const user = await User.findById(id)
-    if(!user){
-      return res.json({ status: false, message: "User not found", data: null });
-    }
+const updateUserStatus = asyncHandler(async (req, res) => {
+	try {
+		const id = req.params.id;
+		const user = await User.findById(id);
+		if (!user) {
+			return res.json({ status: false, message: "User not found", data: null });
+		}
 
-    const updateUser = await User.findByIdAndUpdate(
-      user._id,
-      {
-        status: user.status === "Active" ? "Blocked" : "Active"
-      },
-      { new: true, useFindAndModify: false }
-    );
+		const updateUser = await User.findByIdAndUpdate(
+			user._id,
+			{
+				status: user.status === "Active" ? "Blocked" : "Active",
+			},
+			{ new: true, useFindAndModify: false }
+		);
 
-    if(!updateUser){
-      res.json({status: false, message: "unable to update user's status", data: null})
-    }
+		if (!updateUser) {
+			return res.json({
+				status: false,
+				message: "unable to update user's status",
+				data: null,
+			});
+		}
 
-    res.json({data: null, status: true, message: "User Status Updated successfully"})
-  } catch (error) {
-    res.status(500).json({ status: false, message: error.data.message });
-  }
-})
+		res.json({
+			data: null,
+			status: true,
+			message: "User Status Updated successfully",
+		});
+	} catch (error) {
+		res.status(500).json({ status: false, message: error?.data?.message });
+	}
+});
 
-const updateUser = asyncHandler(async(req, res) => {
-  try {
-    const id = req.params.id
-    const user = await User.findById(id)
-    if(!user){
-      return res.json({ status: false, message: "User not found", data: null });
-    }
+const updateUser = asyncHandler(async (req, res) => {
+	try {
+		const id = req.params.id;
+		const formData = req.body.payload;
+		const user = await User.findById(id);
+		if (!user) {
+			return res.json({ status: false, message: "User not found", data: null });
+		}
 
-    const updateUser = await User.findByIdAndUpdate(
-      user._id,
-      {
-        fullName: formData.fullName ? formData.fullName : user.fullName,
-        email: formData.email ? formData.email : user.email,
-        password: formData.password ? await bcrypt.hash(formData.newPassword, 10) : user.password,
-      },
-      { new: true, useFindAndModify: false }
-    );
+		await User.findByIdAndUpdate(
+			user._id,
+			{
+				fullName: formData.fullName ? formData.fullName : user.fullName,
+				email: formData.email ? formData.email : user.email,
+				password: formData.password
+					? await bcrypt.hash(formData.password, 10)
+					: user.password,
+			},
+			{ new: true }
+		);
 
-    if(!updateUser){
-      res.json({status: false, message: "unable to update user's Profile", data: null})
-    }
-
-    res.json({data: null, status: true, message: "User Status Updated successfully"})
-  } catch (error) {
-    res.status(500).json({ status: false, message: error.data.message });
-  }
-})
-
+		res.json({
+			data: null,
+			status: true,
+			message: "User Status Updated successfully",
+		});
+	} catch (error) {
+		res.status(500).json({ status: false, message: error });
+	}
+});
 
 export {
 	registerUser,
@@ -468,11 +505,11 @@ export {
 	verifyOtp,
 	resetPassword,
 	logout,
-  changePassword,
-  contactUsMessage,
-  sendFeedback,
-  getAllUsers,
-  updateUserStatus,
-  confirmRegistration,
-  updateUser
+	changePassword,
+	contactUsMessage,
+	sendFeedback,
+	getAllUsers,
+	updateUserStatus,
+	confirmRegistration,
+	updateUser,
 };
