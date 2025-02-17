@@ -209,7 +209,9 @@ export const declineWithdrawal = async (req, res) => {
 
 export const sendOTP = async (req, res) => {
 	try {
+    console.log("user: ", req.user.id)
 		const user = await User.findById(req.user.id);
+    console.log("user: ", user)
 		if (!user) {
 			return res.json({ status: false, message: "User not found", data: null });
 		}
@@ -240,6 +242,7 @@ export const sendOTP = async (req, res) => {
 		);
 		res.json({ status: true, message: "OTP sent via email", data: null });
 	} catch (error) {
+    console.log("object12222")
 		res.status(500).json({ message: "Error declining withdrawal", error });
 	}
 };

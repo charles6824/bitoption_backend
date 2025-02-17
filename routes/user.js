@@ -2,12 +2,14 @@ import express from "express";
 import {
   authUser,
   changePassword,
+  confirmRegistration,
   contactUsMessage,
   getAllUsers,
   logout,
   registerUser,
   resetPassword,
   sendFeedback,
+  updateUser,
   updateUserStatus,
   validateAccount,
   verifyOtp,
@@ -25,6 +27,7 @@ const router = express.Router();
 
 router.get("/", protect, admin, getAllUsers)
 router.put("/:id", protect, admin, updateUserStatus)
+router.put("/:id/user", protect, admin, updateUser)
 
 /**
  * @swagger
@@ -60,6 +63,8 @@ router.put("/:id", protect, admin, updateUserStatus)
  */
 router.post("/register", registerUser);
 
+
+router.put("/register/confirm-registration", confirmRegistration)
 /**
  * @swagger
  * /api/users/auth:

@@ -5,7 +5,7 @@ import generateToken from "../utils/generateToken.js";
 import randomstring from "randomstring";
 import Account from "../models/account.js";
 import logActivity from "../utils/logActivity.js";
-import { contactMessage, feedbackMessage, loginMessage, otpMessage, registerMessage } from "../utils/message.js";
+import { confirmRegistrationMessage, contactMessage, feedbackMessage, loginMessage, otpMessage, registerMessage } from "../utils/message.js";
 import sendMail from "../services/sendMail.js";
 import { v4 as uuidv4 } from "uuid";
 import NodeCache from "node-cache";
@@ -22,10 +22,16 @@ const registerUser = asyncHandler(async (req, res) => {
 		if (userExist) {
 			res.json({ status: false, message: "User already exists", data: null });
 		} else {
+      const otp = randomstring.generate({
+        length: 6,
+        charset: "numeric",
+      });
 			const newUser = await new User({
 				fullName: formData.fullName,
 				email: formData.email,
 				password: await bcrypt.hash(formData.password, 10),
+        status: "Blocked",
+        otp: otp,
 			});
 
 			const saveUser = await newUser.save();
@@ -71,14 +77,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
         await sendMail(
           saveUser.email,
-          "Welcome to Bitoption",
-          registerMessage(saveUser.fullName)
+          "Registration confirmation",
+          confirmRegistrationMessage(saveUser.fullName , saveUser.otp)
         );
 
 				res.json({
 					status: true,
-					message: "User created successfully",
-					data: response,
+					message: "Otp sent to your email to complete registration",
+					data: null,
 				});
 			} else {
 				res.json({
@@ -92,6 +98,41 @@ const registerUser = asyncHandler(async (req, res) => {
 		res.status(500).json({ status: false, message: err.message });
 	}
 });
+
+const confirmRegistration = asyncHandler(async(req, res) => {
+  try {
+    const formData = req.body.payload
+    const user = await User.findOne({email: formData.email})
+    if (!user) {
+      return res.json({ status: false, message: "User not found" })
+    }
+
+    if(user.otp !== formData.otp){
+      return res.json({ status: false, message: "Invalid OTP" })
+    }
+
+    const otp = randomstring.generate({
+      length: 6,
+      charset: "numeric",
+    });
+
+    await User.findByIdAndUpdate(user._id, {
+      status: "Active",
+      otp: otp
+    }, { new: true, useFindAndModify: false })
+
+    await sendMail(
+      user.email,
+      "Welcome to Bitoption",
+      registerMessage(user.fullName)
+    );
+
+    res.json({status: true, message: "User created successfully", data: null})
+  
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+})
 
 const authUser = asyncHandler(async (req, res) => {
 	try {
@@ -391,6 +432,34 @@ const updateUserStatus = asyncHandler(async(req, res) => {
   }
 })
 
+const updateUser = asyncHandler(async(req, res) => {
+  try {
+    const id = req.params.id
+    const user = await User.findById(id)
+    if(!user){
+      return res.json({ status: false, message: "User not found", data: null });
+    }
+
+    const updateUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        fullName: formData.fullName ? formData.fullName : user.fullName,
+        email: formData.email ? formData.email : user.email,
+        password: formData.password ? await bcrypt.hash(formData.newPassword, 10) : user.password,
+      },
+      { new: true, useFindAndModify: false }
+    );
+
+    if(!updateUser){
+      res.json({status: false, message: "unable to update user's Profile", data: null})
+    }
+
+    res.json({data: null, status: true, message: "User Status Updated successfully"})
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.data.message });
+  }
+})
+
 
 export {
 	registerUser,
@@ -403,5 +472,7 @@ export {
   contactUsMessage,
   sendFeedback,
   getAllUsers,
-  updateUserStatus
+  updateUserStatus,
+  confirmRegistration,
+  updateUser
 };

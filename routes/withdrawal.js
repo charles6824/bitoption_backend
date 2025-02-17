@@ -176,7 +176,7 @@ router.get("/user", protect, getUserWithdrawals);
 
 /**
  * @swagger
- * /api/withdrawal/verify-otp:
+ * /api/withdrawal/user/verify-otp:
  *   get:
  *     summary: Verify OTP for Withdrawal
  *     tags: [Withdrawals]
@@ -188,6 +188,6 @@ router.get("/user", protect, getUserWithdrawals);
  *       500:
  *         description: Server error
  */
-router.get("/verify-otp", protect, user, sendOTP);
+router.put("/user/verify-otp", protect, user, sendOTP);
 
 export default router;
