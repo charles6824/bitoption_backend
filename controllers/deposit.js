@@ -75,6 +75,58 @@ export const fundWallet = asyncHandler(async (req, res) => {
 	}
 });
 
+// Fund Wallet (Admin)
+export const fundWalletAvailableBalance = asyncHandler(async (req, res) => {
+	try {
+		const formData = req.body.payload; // Extracting payload
+		const { amount, accountName, accountNumber } = formData;
+		const reference = uuidv4();
+		console.log("formData: ", formData);
+		const account = await Account.findOne({ accountNumber: accountNumber });
+		const userId = account.user;
+		console.log("account; ", userId);
+
+		const newDeposit = await new Deposit({
+			amount,
+			accountName,
+			accountNumber,
+			narration: "From Admin",
+			user: userId,
+			method: "admin",
+			reference,
+			status: "approved", // Admin funding, auto-approved
+		});
+
+		const saveDeposit = await newDeposit.save();
+		if (saveDeposit) {
+			await Account.findByIdAndUpdate(
+				account._id,
+				{ availableBalance: Number(account.availableBalance) + Number(amount) },
+				{ new: true }
+			);
+			await createTransaction({
+				user: userId,
+				amount: amount,
+				description: `Deposit/247BO/From Admin`,
+				reference: reference,
+				status: "completed",
+				type: "inflow",
+			});
+			res.json({
+				message: "Wallet funded successfully",
+				data: null,
+				status: true,
+			});
+		} else {
+			res.json({ message: "Failed to fund wallet", data: null, status: false });
+		}
+	} catch (error) {
+		return res
+			.status(500)
+			.json({ message: "Error funding wallet", data: null, status: false });
+	}
+});
+
 // Fund with Bank (User)
 export const fundWithBank = async (req, res) => {
 	try {

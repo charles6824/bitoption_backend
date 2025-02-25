@@ -1,7 +1,15 @@
-import express from "express"
+import express from "express";
 import { admin, protect, user } from "../middleware/authMiddleware.js";
-import { approveFunding, declineFunding, fundWallet, fundWithBank, fundWithCrypto, getAllDeposits } from "../controllers/deposit.js";
-const router = express.Router()
+import {
+	approveFunding,
+	declineFunding,
+	fundWallet,
+	fundWalletAvailableBalance,
+	fundWithBank,
+	fundWithCrypto,
+	getAllDeposits,
+} from "../controllers/deposit.js";
+const router = express.Router();
 
 /**
  * @swagger
@@ -10,7 +18,7 @@ const router = express.Router()
  *   description: Endpoints for funding wallets and managing deposits
  */
 
-router.get("/", protect, admin, getAllDeposits)
+router.get("/", protect, admin, getAllDeposits);
 
 /**
  * @swagger
@@ -43,6 +51,43 @@ router.get("/", protect, admin, getAllDeposits)
  *         description: Internal server error
  */
 router.post("/fund-wallet", protect, admin, fundWallet);
+
+/**
+ * @swagger
+ * /api/deposit/fund-available-wallet:
+ *   post:
+ *     summary: Fund a user's wallet (Admin only)
+ *     tags: [Deposit Management]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               payload:
+ *                 type: object
+ *                 properties:
+ *                   amount:
+ *                     type: number
+ *                   accountName:
+ *                     type: string
+ *                   accountNumber:
+ *                     type: string
+ *     responses:
+ *       201:
+ *         description: Wallet funded successfully
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+	"/fund-available-wallet",
+	protect,
+	admin,
+	fundWalletAvailableBalance
+);
 
 /**
  * @swagger
@@ -158,4 +203,4 @@ router.put("/approve/:depositId", protect, admin, approveFunding);
  */
 router.put("/decline/:depositId", protect, admin, declineFunding);
 
-export default router
+export default router;
