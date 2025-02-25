@@ -18,9 +18,17 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 		const account = await Account.findOne({ user: req.user.id });
 		// console.log(userAccount);
 
-		if (!formData.amount || formData.amount > userAccount.balance) {
+		if (!formData.amount) {
 			return res.json({
 				message: "Invalid withdrawal amount",
+				status: false,
+				data: null,
+			});
+		}
+
+		if (formData.amount > userAccount.availableBalance) {
+			return res.json({
+				message: "Insufficient available balance",
 				status: false,
 				data: null,
 			});
