@@ -16,8 +16,8 @@ export const createTransfer = asyncHandler(async (req, res) => {
 		const myAccount = await Account.findOne({ user: req.user.id });
 		const userAccount = await Account.findOne({ accountNumber: accountNumber });
 
-    if(myAccount.balance < amount){
-      return res.json({ message: "Insufficient balance", data: null, status: false });
+    if(myAccount.availableBalance < amount){
+      return res.json({ message: "Insufficient available balance", data: null, status: false });
     }
 
 		const newTransfer = await new Transfer({
@@ -32,6 +32,8 @@ export const createTransfer = asyncHandler(async (req, res) => {
 		const saveTransfer = await newTransfer.save();
 		const newBalance = Number(userAccount.balance) + Number(amount);
 		const myBalance = Number(myAccount.balance) - Number(amount);
+		const newAvailBalance = Number(userAccount.availableBalance) + Number(amount);
+		const myAvailBalance = Number(myAccount.availableBalance) - Number(amount);
 		if (saveTransfer) {
 			await createTransaction({
 				user: req.user.id,
@@ -57,13 +59,13 @@ export const createTransfer = asyncHandler(async (req, res) => {
 
 			await Account.findByIdAndUpdate(
 				myAccount._id,
-				{ balance: myBalance },
+				{ balance: myBalance, availableBalance: myAvailBalance },
 				{ new: true, useFindAndModify: false }
 			);
 
 			await Account.findByIdAndUpdate(
 				userAccount._id,
-				{ balance: newBalance },
+				{ balance: newBalance, availableBalance: newAvailBalance },
 				{ new: true, useFindAndModify: false }
 			);
 

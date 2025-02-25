@@ -8,7 +8,7 @@ import User from "../models/user.js";
 
 export const getAllDeposits = asyncHandler(async (req, res) => {
 	try {
-		const deposits = await Deposit.find({}).sort({ createdAt: -1 });;
+		const deposits = await Deposit.find({}).sort({ createdAt: -1 });
 		if (deposits) {
 			res.json({ data: deposits, message: "Deposits retrieved", status: true });
 		} else {
@@ -131,8 +131,8 @@ export const fundWithCrypto = async (req, res) => {
 
 		const saveDep = await newDeposit.save();
 		if (saveDep) {
-		console.log("saveDep: ", saveDep);
-      
+			console.log("saveDep: ", saveDep);
+
 			await createTransaction({
 				user: userId,
 				amount: amount,
@@ -183,7 +183,11 @@ export const approveFunding = async (req, res) => {
 
 		await Account.findByIdAndUpdate(
 			account._id,
-			{ balance: Number(account.balance) + Number(transactionDeposit.amount) },
+			{
+				balance: Number(account.balance) + Number(transactionDeposit.amount),
+				availableBalance:
+					Number(account.availableBalance) + Number(transactionDeposit.amount),
+			},
 			{ new: true }
 		);
 

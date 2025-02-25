@@ -7,6 +7,7 @@ const accountSchema = mongoose.Schema(
 		accountNumber: { type: String, required: true },
 		currency: { type: String, required: true },
 		balance: { type: Number, default: 0, required: true },
+		availableBalance: { type: Number, default: 0, required: true },
 		accountLevel: { type: String, default: "Tier 1", required: true },
 		accountStatus: { type: String, enum: ["Active", "Inactive", "Suspended", "Frozen", "Blocked"], required: true, default: "Active" },
 	},

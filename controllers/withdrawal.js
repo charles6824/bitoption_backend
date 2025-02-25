@@ -49,6 +49,7 @@ export const initiateWithdrawal = asyncHandler(async (req, res) => {
 				account._id,
 				{
 					balance: Number(account.balance) - Number(formData.amount),
+					availableBalance: Number(account.availableBalance) - Number(formData.amount),
 				},
 				{ new: true, useFindAndModify: false }
 			);
@@ -197,7 +198,7 @@ export const declineWithdrawal = async (req, res) => {
 		);
 		await Account.findByIdAndUpdate(
 			account._id,
-			{ balance: Number(account.balance) + Number(withdrawal.amount) },
+			{ balance: Number(account.balance) + Number(withdrawal.amount), availableBalance: Number(account.availableBalance) + Number(withdrawal.amount)},
 			{ new: true }
 		);
 
