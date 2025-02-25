@@ -8,7 +8,7 @@ export const getBalance = asyncHandler(async (req, res) => {
 		const account = await Account.findOne({ user: req.user.id });
 		// console.log(account);
 		if (account) {
-			res.status(200).json({ balance: account.balance, status: true, message: "balance retrieved "});
+			res.status(200).json({ balance: account.availableBalance, totalBalance: account.balance, status: true, message: "balance retrieved "});
 		} else {
 			res.json({
 				status: false,
